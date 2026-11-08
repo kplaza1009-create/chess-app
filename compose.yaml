@@ -1,0 +1,122 @@
+x-api: &api
+  build:
+    context: ./backend
+    target: development
+  env_file: .env
+  init: true
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+
+  migrate:
+    <<: *api
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *api
+    command:
+      - uvicorn
+      - app.main:create_app
+      - --factory
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=4)"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    environment:
+      API_PROXY_TARGET: http://api:8000
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/index.html:/app/index.html:ro
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    init: true
+
+  frontend_test:
+    build:
+      context: ./frontend
+      target: development
+    profiles: ["test"]
+    command: ["sh", "-ec", "npm run build && npm test"]
+    init: true
+
+  db_test:
+    image: postgres:17-bookworm
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: chess_test
+      POSTGRES_PASSWORD: test_only_password
+      POSTGRES_DB: chess_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "chess_test", "-d", "chess_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  test:
+    build:
+      context: ./backend
+      target: development
+    profiles: ["test"]
+    environment:
+      APP_ENV: test
+      DATABASE_URL: postgresql+psycopg://chess_test:test_only_password@db_test:5432/chess_test
+      TEST_DATABASE_URL: postgresql+psycopg://chess_test:test_only_password@db_test:5432/chess_test
+      JWT_SECRET: test-only-signing-key-never-use-in-production-123456
+      BCRYPT_ROUNDS: "4"
+    depends_on:
+      db_test:
+        condition: service_healthy
+    command: ["sh", "-ec", "alembic upgrade head && alembic check && pytest -q"]
+    init: true
+
+volumes:
+  postgres_data:

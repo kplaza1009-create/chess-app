@@ -1,0 +1,584 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-29T21:18:09.422779Z",
+  "title": "Design System: Chess Room",
+  "extensions": {
+    "colorMeta": {
+      "page": {
+        "role": "neutral",
+        "displayName": "Light Page",
+        "tonalRamp": [
+          "oklch(15.0% 0.00568 128.53)",
+          "oklch(26.43% 0.00568 128.53)",
+          "oklch(37.86% 0.00568 128.53)",
+          "oklch(49.29% 0.00568 128.53)",
+          "oklch(60.71% 0.00568 128.53)",
+          "oklch(72.14% 0.00568 128.53)",
+          "oklch(83.57% 0.00568 128.53)",
+          "oklch(95.0% 0.00568 128.53)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Light Field Surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.00283 128.49)",
+          "oklch(26.43% 0.00283 128.49)",
+          "oklch(37.86% 0.00283 128.49)",
+          "oklch(49.29% 0.00283 128.49)",
+          "oklch(60.71% 0.00283 128.49)",
+          "oklch(72.14% 0.00283 128.49)",
+          "oklch(83.57% 0.00283 128.49)",
+          "oklch(95.0% 0.00283 128.49)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Light Subtle Surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.01071 136.56)",
+          "oklch(26.43% 0.01071 136.56)",
+          "oklch(37.86% 0.01071 136.56)",
+          "oklch(49.29% 0.01071 136.56)",
+          "oklch(60.71% 0.01071 136.56)",
+          "oklch(72.14% 0.01071 136.56)",
+          "oklch(83.57% 0.01071 136.56)",
+          "oklch(95.0% 0.01071 136.56)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Light Primary Text",
+        "tonalRamp": [
+          "oklch(15.0% 0.02429 159.15)",
+          "oklch(26.43% 0.02429 159.15)",
+          "oklch(37.86% 0.02429 159.15)",
+          "oklch(49.29% 0.02429 159.15)",
+          "oklch(60.71% 0.02429 159.15)",
+          "oklch(72.14% 0.02429 159.15)",
+          "oklch(83.57% 0.02429 159.15)",
+          "oklch(95.0% 0.02429 159.15)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Light Muted Text",
+        "tonalRamp": [
+          "oklch(15.0% 0.02140 155.30)",
+          "oklch(26.43% 0.02140 155.30)",
+          "oklch(37.86% 0.02140 155.30)",
+          "oklch(49.29% 0.02140 155.30)",
+          "oklch(60.71% 0.02140 155.30)",
+          "oklch(72.14% 0.02140 155.30)",
+          "oklch(83.57% 0.02140 155.30)",
+          "oklch(95.0% 0.02140 155.30)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Light Quiet Divider",
+        "tonalRamp": [
+          "oklch(15.0% 0.01662 142.55)",
+          "oklch(26.43% 0.01662 142.55)",
+          "oklch(37.86% 0.01662 142.55)",
+          "oklch(49.29% 0.01662 142.55)",
+          "oklch(60.71% 0.01662 142.55)",
+          "oklch(72.14% 0.01662 142.55)",
+          "oklch(83.57% 0.01662 142.55)",
+          "oklch(95.0% 0.01662 142.55)"
+        ]
+      },
+      "field-line": {
+        "role": "neutral",
+        "displayName": "Light Field Boundary",
+        "tonalRamp": [
+          "oklch(15.0% 0.03044 150.13)",
+          "oklch(26.43% 0.03044 150.13)",
+          "oklch(37.86% 0.03044 150.13)",
+          "oklch(49.29% 0.03044 150.13)",
+          "oklch(60.71% 0.03044 150.13)",
+          "oklch(72.14% 0.03044 150.13)",
+          "oklch(83.57% 0.03044 150.13)",
+          "oklch(95.0% 0.03044 150.13)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Light Action Green",
+        "tonalRamp": [
+          "oklch(15.0% 0.07226 158.48)",
+          "oklch(26.43% 0.07226 158.48)",
+          "oklch(37.86% 0.07226 158.48)",
+          "oklch(49.29% 0.07226 158.48)",
+          "oklch(60.71% 0.07226 158.48)",
+          "oklch(72.14% 0.07226 158.48)",
+          "oklch(83.57% 0.07226 158.48)",
+          "oklch(95.0% 0.07226 158.48)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Light Action Hover",
+        "tonalRamp": [
+          "oklch(15.0% 0.06344 158.16)",
+          "oklch(26.43% 0.06344 158.16)",
+          "oklch(37.86% 0.06344 158.16)",
+          "oklch(49.29% 0.06344 158.16)",
+          "oklch(60.71% 0.06344 158.16)",
+          "oklch(72.14% 0.06344 158.16)",
+          "oklch(83.57% 0.06344 158.16)",
+          "oklch(95.0% 0.06344 158.16)"
+        ]
+      },
+      "on-accent": {
+        "role": "primary",
+        "displayName": "Light On-Action Ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.00745 151.89)",
+          "oklch(26.43% 0.00745 151.89)",
+          "oklch(37.86% 0.00745 151.89)",
+          "oklch(49.29% 0.00745 151.89)",
+          "oklch(60.71% 0.00745 151.89)",
+          "oklch(72.14% 0.00745 151.89)",
+          "oklch(83.57% 0.00745 151.89)",
+          "oklch(95.0% 0.00745 151.89)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Light Focus Green",
+        "tonalRamp": [
+          "oklch(15.0% 0.08558 152.40)",
+          "oklch(26.43% 0.08558 152.40)",
+          "oklch(37.86% 0.08558 152.40)",
+          "oklch(49.29% 0.08558 152.40)",
+          "oklch(60.71% 0.08558 152.40)",
+          "oklch(72.14% 0.08558 152.40)",
+          "oklch(83.57% 0.08558 152.40)",
+          "oklch(95.0% 0.08558 152.40)"
+        ]
+      },
+      "error": {
+        "role": "neutral",
+        "displayName": "Light Error Text",
+        "tonalRamp": [
+          "oklch(15.0% 0.16434 23.46)",
+          "oklch(26.43% 0.16434 23.46)",
+          "oklch(37.86% 0.16434 23.46)",
+          "oklch(49.29% 0.16434 23.46)",
+          "oklch(60.71% 0.16434 23.46)",
+          "oklch(72.14% 0.16434 23.46)",
+          "oklch(83.57% 0.16434 23.46)",
+          "oklch(95.0% 0.16434 23.46)"
+        ]
+      },
+      "error-surface": {
+        "role": "neutral",
+        "displayName": "Light Error Surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.01632 22.08)",
+          "oklch(26.43% 0.01632 22.08)",
+          "oklch(37.86% 0.01632 22.08)",
+          "oklch(49.29% 0.01632 22.08)",
+          "oklch(60.71% 0.01632 22.08)",
+          "oklch(72.14% 0.01632 22.08)",
+          "oklch(83.57% 0.01632 22.08)",
+          "oklch(95.0% 0.01632 22.08)"
+        ]
+      },
+      "error-line": {
+        "role": "neutral",
+        "displayName": "Light Error Boundary",
+        "tonalRamp": [
+          "oklch(15.0% 0.05341 21.20)",
+          "oklch(26.43% 0.05341 21.20)",
+          "oklch(37.86% 0.05341 21.20)",
+          "oklch(49.29% 0.05341 21.20)",
+          "oklch(60.71% 0.05341 21.20)",
+          "oklch(72.14% 0.05341 21.20)",
+          "oklch(83.57% 0.05341 21.20)",
+          "oklch(95.0% 0.05341 21.20)"
+        ]
+      },
+      "dark-page": {
+        "role": "neutral",
+        "displayName": "Dark Page",
+        "tonalRamp": [
+          "oklch(15.0% 0.01188 156.08)",
+          "oklch(26.43% 0.01188 156.08)",
+          "oklch(37.86% 0.01188 156.08)",
+          "oklch(49.29% 0.01188 156.08)",
+          "oklch(60.71% 0.01188 156.08)",
+          "oklch(72.14% 0.01188 156.08)",
+          "oklch(83.57% 0.01188 156.08)",
+          "oklch(95.0% 0.01188 156.08)"
+        ]
+      },
+      "dark-surface": {
+        "role": "neutral",
+        "displayName": "Dark Field Surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.01708 155.78)",
+          "oklch(26.43% 0.01708 155.78)",
+          "oklch(37.86% 0.01708 155.78)",
+          "oklch(49.29% 0.01708 155.78)",
+          "oklch(60.71% 0.01708 155.78)",
+          "oklch(72.14% 0.01708 155.78)",
+          "oklch(83.57% 0.01708 155.78)",
+          "oklch(95.0% 0.01708 155.78)"
+        ]
+      },
+      "dark-subtle": {
+        "role": "neutral",
+        "displayName": "Dark Subtle Surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.02287 152.51)",
+          "oklch(26.43% 0.02287 152.51)",
+          "oklch(37.86% 0.02287 152.51)",
+          "oklch(49.29% 0.02287 152.51)",
+          "oklch(60.71% 0.02287 152.51)",
+          "oklch(72.14% 0.02287 152.51)",
+          "oklch(83.57% 0.02287 152.51)",
+          "oklch(95.0% 0.02287 152.51)"
+        ]
+      },
+      "dark-text": {
+        "role": "neutral",
+        "displayName": "Dark Primary Text",
+        "tonalRamp": [
+          "oklch(15.0% 0.01067 136.56)",
+          "oklch(26.43% 0.01067 136.56)",
+          "oklch(37.86% 0.01067 136.56)",
+          "oklch(49.29% 0.01067 136.56)",
+          "oklch(60.71% 0.01067 136.56)",
+          "oklch(72.14% 0.01067 136.56)",
+          "oklch(83.57% 0.01067 136.56)",
+          "oklch(95.0% 0.01067 136.56)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Muted Text",
+        "tonalRamp": [
+          "oklch(15.0% 0.02360 141.22)",
+          "oklch(26.43% 0.02360 141.22)",
+          "oklch(37.86% 0.02360 141.22)",
+          "oklch(49.29% 0.02360 141.22)",
+          "oklch(60.71% 0.02360 141.22)",
+          "oklch(72.14% 0.02360 141.22)",
+          "oklch(83.57% 0.02360 141.22)",
+          "oklch(95.0% 0.02360 141.22)"
+        ]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "Dark Quiet Divider",
+        "tonalRamp": [
+          "oklch(15.0% 0.02602 151.38)",
+          "oklch(26.43% 0.02602 151.38)",
+          "oklch(37.86% 0.02602 151.38)",
+          "oklch(49.29% 0.02602 151.38)",
+          "oklch(60.71% 0.02602 151.38)",
+          "oklch(72.14% 0.02602 151.38)",
+          "oklch(83.57% 0.02602 151.38)",
+          "oklch(95.0% 0.02602 151.38)"
+        ]
+      },
+      "dark-field-line": {
+        "role": "neutral",
+        "displayName": "Dark Field Boundary",
+        "tonalRamp": [
+          "oklch(15.0% 0.03379 148.10)",
+          "oklch(26.43% 0.03379 148.10)",
+          "oklch(37.86% 0.03379 148.10)",
+          "oklch(49.29% 0.03379 148.10)",
+          "oklch(60.71% 0.03379 148.10)",
+          "oklch(72.14% 0.03379 148.10)",
+          "oklch(83.57% 0.03379 148.10)",
+          "oklch(95.0% 0.03379 148.10)"
+        ]
+      },
+      "dark-accent": {
+        "role": "primary",
+        "displayName": "Dark Action Green",
+        "tonalRamp": [
+          "oklch(15.0% 0.07230 137.59)",
+          "oklch(26.43% 0.07230 137.59)",
+          "oklch(37.86% 0.07230 137.59)",
+          "oklch(49.29% 0.07230 137.59)",
+          "oklch(60.71% 0.07230 137.59)",
+          "oklch(72.14% 0.07230 137.59)",
+          "oklch(83.57% 0.07230 137.59)",
+          "oklch(95.0% 0.07230 137.59)"
+        ]
+      },
+      "dark-accent-hover": {
+        "role": "primary",
+        "displayName": "Dark Action Hover",
+        "tonalRamp": [
+          "oklch(15.0% 0.06236 137.89)",
+          "oklch(26.43% 0.06236 137.89)",
+          "oklch(37.86% 0.06236 137.89)",
+          "oklch(49.29% 0.06236 137.89)",
+          "oklch(60.71% 0.06236 137.89)",
+          "oklch(72.14% 0.06236 137.89)",
+          "oklch(83.57% 0.06236 137.89)",
+          "oklch(95.0% 0.06236 137.89)"
+        ]
+      },
+      "dark-on-accent": {
+        "role": "primary",
+        "displayName": "Dark On-Action Ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.02610 151.29)",
+          "oklch(26.43% 0.02610 151.29)",
+          "oklch(37.86% 0.02610 151.29)",
+          "oklch(49.29% 0.02610 151.29)",
+          "oklch(60.71% 0.02610 151.29)",
+          "oklch(72.14% 0.02610 151.29)",
+          "oklch(83.57% 0.02610 151.29)",
+          "oklch(95.0% 0.02610 151.29)"
+        ]
+      },
+      "dark-focus": {
+        "role": "primary",
+        "displayName": "Dark Focus Green",
+        "tonalRamp": [
+          "oklch(15.0% 0.07230 137.59)",
+          "oklch(26.43% 0.07230 137.59)",
+          "oklch(37.86% 0.07230 137.59)",
+          "oklch(49.29% 0.07230 137.59)",
+          "oklch(60.71% 0.07230 137.59)",
+          "oklch(72.14% 0.07230 137.59)",
+          "oklch(83.57% 0.07230 137.59)",
+          "oklch(95.0% 0.07230 137.59)"
+        ]
+      },
+      "dark-error": {
+        "role": "neutral",
+        "displayName": "Dark Error Text",
+        "tonalRamp": [
+          "oklch(15.0% 0.08648 18.15)",
+          "oklch(26.43% 0.08648 18.15)",
+          "oklch(37.86% 0.08648 18.15)",
+          "oklch(49.29% 0.08648 18.15)",
+          "oklch(60.71% 0.08648 18.15)",
+          "oklch(72.14% 0.08648 18.15)",
+          "oklch(83.57% 0.08648 18.15)",
+          "oklch(95.0% 0.08648 18.15)"
+        ]
+      },
+      "dark-error-surface": {
+        "role": "neutral",
+        "displayName": "Dark Error Surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.03832 14.47)",
+          "oklch(26.43% 0.03832 14.47)",
+          "oklch(37.86% 0.03832 14.47)",
+          "oklch(49.29% 0.03832 14.47)",
+          "oklch(60.71% 0.03832 14.47)",
+          "oklch(72.14% 0.03832 14.47)",
+          "oklch(83.57% 0.03832 14.47)",
+          "oklch(95.0% 0.03832 14.47)"
+        ]
+      },
+      "dark-error-line": {
+        "role": "neutral",
+        "displayName": "Dark Error Boundary",
+        "tonalRamp": [
+          "oklch(15.0% 0.05593 8.18)",
+          "oklch(26.43% 0.05593 8.18)",
+          "oklch(37.86% 0.05593 8.18)",
+          "oklch(49.29% 0.05593 8.18)",
+          "oklch(60.71% 0.05593 8.18)",
+          "oklch(72.14% 0.05593 8.18)",
+          "oklch(83.57% 0.05593 8.18)",
+          "oklch(95.0% 0.05593 8.18)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Public-home headline; responsive sizes are described in DESIGN.md."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Authentication and account page headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings, with a smaller account-card title."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Shared self-hosted family; paragraph size and leading are contextual."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Visible form labels."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Primary and quiet action labels."
+      },
+      "field": {
+        "displayName": "Field",
+        "purpose": "Text entered into form fields."
+      },
+      "helper": {
+        "displayName": "Helper",
+        "purpose": "Field hints and inline errors."
+      },
+      "rating-value": {
+        "displayName": "Rating Value",
+        "purpose": "Ratings with tabular numerals."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "button-state",
+        "value": "background-color 160ms ease, transform 160ms ease",
+        "purpose": "Enabled button hover and press feedback; active press translates down by 1px."
+      },
+      {
+        "name": "field-state",
+        "value": "border-color 160ms ease, background-color 160ms ease",
+        "purpose": "Field hover and focus feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition: none !important; scroll-behavior: auto !important",
+        "purpose": "Applied globally when prefers-reduced-motion is reduce; no entrance, looping, shimmer, or parallax animation is implemented."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-max",
+        "value": "1100px"
+      },
+      {
+        "name": "compact-max",
+        "value": "767px"
+      },
+      {
+        "name": "phone-max",
+        "value": "479px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled primary account action with short hover and press feedback.",
+      "html": "<button type=\"button\" class=\"ds-primary\">Create account<svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z\"></path></svg></button>",
+      "css": ".ds-primary{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:28px;border:0;border-radius:var(--radius,12px);padding:12px 22px;font-size:.875rem;font-weight:650;white-space:nowrap;transition:background-color 160ms ease,transform 160ms ease;cursor:pointer;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-primary{background-color:var(--accent, #275b40);color:var(--on-accent, #f5faf6)}@media(prefers-color-scheme:dark){.ds-primary{background-color:var(--accent, #b5d7a9);color:var(--on-accent, #18251b)}}.ds-primary:hover:not(:disabled){background-color:var(--accent-hover, #1d4932)}@media(prefers-color-scheme:dark){.ds-primary:hover:not(:disabled){background-color:var(--accent-hover, #c9e7bf)}}.ds-primary:focus-visible{outline-color:var(--focus, #346c46)}@media(prefers-color-scheme:dark){.ds-primary:focus-visible{outline-color:var(--focus, #b5d7a9)}}.ds-primary:focus-visible{outline-style:solid;outline-width:3px;outline-offset:4px;}.ds-primary:active:not(:disabled){transform:translateY(1px)}.ds-primary:disabled{cursor:wait;opacity:.64}@media(max-width:479px){.ds-primary{gap:20px;padding-inline:18px}}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Outlined secondary account action used in the header.",
+      "html": "<button type=\"button\" class=\"ds-quiet\">Sign out</button>",
+      "css": ".ds-quiet{display:inline-flex;min-height:42px;align-items:center;justify-content:center;border-style:solid;border-width:1px;border-radius:var(--radius,12px);background:transparent;padding:10px 17px;font-size:.875rem;font-weight:650;transition:background-color 160ms ease,transform 160ms ease;cursor:pointer;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-quiet{border-color:var(--line, #d3dcd2);color:var(--text, #1b2921)}@media(prefers-color-scheme:dark){.ds-quiet{border-color:var(--line, #364439);color:var(--text, #eef3ec)}}.ds-quiet:hover:not(:disabled){background-color:var(--subtle, #e9eee7)}@media(prefers-color-scheme:dark){.ds-quiet:hover:not(:disabled){background-color:var(--subtle, #263229)}}.ds-quiet:focus-visible{outline-color:var(--focus, #346c46)}@media(prefers-color-scheme:dark){.ds-quiet:focus-visible{outline-color:var(--focus, #b5d7a9)}}.ds-quiet:focus-visible{outline-style:solid;outline-width:3px;outline-offset:4px;}.ds-quiet:active:not(:disabled){transform:translateY(1px)}.ds-quiet:disabled{opacity:.64;cursor:wait}@media(prefers-reduced-motion:reduce){.ds-quiet{transition:none}}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Visible label, strong resting boundary, and associated supporting text.",
+      "html": "<div class=\"ds-field-group\"><label for=\"ds-username\">Username</label><input class=\"ds-field\" id=\"ds-username\" name=\"username\" autocomplete=\"username\" aria-describedby=\"ds-username-hint\"><p class=\"ds-hint\" id=\"ds-username-hint\">3-24 letters, numbers, or underscores.</p></div>",
+      "css": ".ds-field-group{display:flex;flex-direction:column;gap:9px;width:100%;max-width:390px;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-field-group label{font-size:.85rem;font-weight:650}.ds-field{width:100%;min-height:50px;padding:12px 15px;border-style:solid;border-width:1px;border-radius:var(--radius,12px);font-size:1rem;line-height:1.5;transition:border-color 160ms ease,background-color 160ms ease;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-field-group{color:var(--text, #1b2921)}@media(prefers-color-scheme:dark){.ds-field-group{color:var(--text, #eef3ec)}}.ds-field{background-color:var(--surface, #fcfdfb);color:var(--text, #1b2921);border-color:var(--field-line, #7b8d7e);caret-color:var(--accent, #275b40)}@media(prefers-color-scheme:dark){.ds-field{background-color:var(--surface, #1b241e);color:var(--text, #eef3ec);border-color:var(--field-line, #718473);caret-color:var(--accent, #b5d7a9)}}.ds-field:hover:not(:disabled),.ds-field:focus-visible{border-color:var(--accent, #275b40)}@media(prefers-color-scheme:dark){.ds-field:hover:not(:disabled),.ds-field:focus-visible{border-color:var(--accent, #b5d7a9)}}.ds-field:focus-visible{outline-color:var(--focus, #346c46)}@media(prefers-color-scheme:dark){.ds-field:focus-visible{outline-color:var(--focus, #b5d7a9)}}.ds-field:focus-visible{outline-style:solid;outline-width:2px;outline-offset:2px;}.ds-field[aria-invalid=\"true\"]{border-color:var(--error, #a3222a)}@media(prefers-color-scheme:dark){.ds-field[aria-invalid=\"true\"]{border-color:var(--error, #ffb5b6)}}.ds-field:disabled{opacity:.72}.ds-hint{margin:0;font-size:.75rem;line-height:1.6}.ds-hint{color:var(--muted, #56635a)}@media(prefers-color-scheme:dark){.ds-hint{color:var(--muted, #b0bcae)}}@media(prefers-reduced-motion:reduce){.ds-field{transition:none}}"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "description": "Knight wordmark and compact text navigation from the account shell.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Preview navigation\"><a class=\"ds-brand\" href=\"#\"><span class=\"ds-brand-mark\"><svg width=\"27\" height=\"27\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M202.05,55A103.24,103.24,0,0,0,128,24h-8a8,8,0,0,0-8,8V59.53L11.81,121.19a8,8,0,0,0-2.59,11.05l13.78,22,.3.43a31.84,31.84,0,0,0,31.34,12.83c13.93-2.36,38.62-6.54,61.4,3.29l-26.6,36.57A84.71,84.71,0,0,1,69.34,194,8,8,0,1,0,58.67,206a103.32,103.32,0,0,0,69.26,26l2.17,0a104,104,0,0,0,72-177ZM124,112a12,12,0,1,1,12-12A12,12,0,0,1,124,112Z\"></path></svg></span><span>Chess Room<span class=\"ds-period\">.</span></span></a><span class=\"ds-nav-links\"><a class=\"ds-nav-link\" href=\"#\">Sign in</a></span></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:80px;border-bottom-style:solid;border-bottom-width:1px;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-brand{display:inline-flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:750;letter-spacing:-.035em;white-space:nowrap;text-decoration:none}.ds-brand-mark{display:flex;width:37px;height:37px;align-items:center;justify-content:center;border-radius:10px}.ds-nav-links{display:flex;align-items:center;gap:28px;font-size:.85rem}.ds-nav-link{padding:12px 0;font-weight:600;text-decoration:none}.ds-nav{color:var(--text, #1b2921);border-color:var(--line, #d3dcd2)}@media(prefers-color-scheme:dark){.ds-nav{color:var(--text, #eef3ec);border-color:var(--line, #364439)}}.ds-brand-mark{background-color:var(--accent, #275b40);color:var(--on-accent, #f5faf6)}@media(prefers-color-scheme:dark){.ds-brand-mark{background-color:var(--accent, #b5d7a9);color:var(--on-accent, #18251b)}}.ds-period{color:var(--accent, #275b40)}@media(prefers-color-scheme:dark){.ds-period{color:var(--accent, #b5d7a9)}}.ds-nav-link:hover{color:var(--accent, #275b40)}@media(prefers-color-scheme:dark){.ds-nav-link:hover{color:var(--accent, #b5d7a9)}}.ds-nav-link:hover{text-decoration:underline;text-underline-offset:5px}.ds-brand:focus-visible{outline-color:var(--focus, #346c46)}@media(prefers-color-scheme:dark){.ds-brand:focus-visible{outline-color:var(--focus, #b5d7a9)}}.ds-brand:focus-visible{outline-style:solid;outline-width:3px;outline-offset:4px;}.ds-nav-link:focus-visible{outline-color:var(--focus, #346c46)}@media(prefers-color-scheme:dark){.ds-nav-link:focus-visible{outline-color:var(--focus, #b5d7a9)}}.ds-nav-link:focus-visible{outline-style:solid;outline-width:3px;outline-offset:4px;}@media(max-width:767px){.ds-nav{min-height:72px;gap:16px}.ds-nav-links{gap:18px}}@media(max-width:479px){.ds-brand{font-size:1rem}}"
+    },
+    {
+      "name": "Account Details Card",
+      "kind": "card",
+      "refersTo": "account-card",
+      "description": "Flat tonal account container with a circular initial avatar; sample values are preview-only.",
+      "html": "<aside class=\"ds-account-card\" aria-labelledby=\"ds-account-title\"><span class=\"ds-avatar\" aria-hidden=\"true\">K</span><h2 id=\"ds-account-title\">Your account</h2><dl><div><dt>Username</dt><dd>@sample_player</dd></div><div><dt>Email address</dt><dd>player@example.com</dd></div></dl></aside>",
+      "css": ".ds-account-card{padding:28px;border-radius:16px;max-width:320px;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-avatar{display:flex;width:52px;height:52px;align-items:center;justify-content:center;border-radius:50%;font-size:1.5rem;font-weight:600}.ds-account-card h2{margin:24px 0 0;font-size:1rem;font-weight:650;letter-spacing:-.025em}.ds-account-card dl{display:flex;flex-direction:column;gap:22px;margin:24px 0 0;font-size:.825rem}.ds-account-card dt{margin-bottom:7px;font-size:.7rem}.ds-account-card dd{margin:0;overflow-wrap:anywhere;line-height:1.6}.ds-account-card{background-color:var(--subtle, #e9eee7);color:var(--text, #1b2921)}@media(prefers-color-scheme:dark){.ds-account-card{background-color:var(--subtle, #263229);color:var(--text, #eef3ec)}}.ds-avatar{background-color:var(--accent, #275b40);color:var(--on-accent, #f5faf6)}@media(prefers-color-scheme:dark){.ds-avatar{background-color:var(--accent, #b5d7a9);color:var(--on-accent, #18251b)}}.ds-account-card dt{color:var(--muted, #56635a)}@media(prefers-color-scheme:dark){.ds-account-card dt{color:var(--muted, #b0bcae)}}@media(max-width:767px){.ds-account-card{padding:24px}}"
+    },
+    {
+      "name": "Rating Row",
+      "kind": "custom",
+      "description": "Divided rating list item with a pace icon and tabular value; sample rating is preview-only.",
+      "html": "<article class=\"ds-rating-row\" aria-label=\"Blitz rating\"><span class=\"ds-rating-icon\"><svg width=\"25\" height=\"25\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,40a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,40Zm0,176a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,216ZM173.66,90.34a8,8,0,0,1,0,11.32l-40,40a8,8,0,0,1-11.32-11.32l40-40A8,8,0,0,1,173.66,90.34ZM96,16a8,8,0,0,1,8-8h48a8,8,0,0,1,0,16H104A8,8,0,0,1,96,16Z\"></path></svg></span><h3>Blitz</h3><span class=\"ds-rating-value\"><strong>Unrated</strong><span>Starting rating</span></span></article>",
+      "css": ".ds-rating-row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:18px;min-height:96px;border-bottom-style:solid;border-bottom-width:1px;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-rating-row h3{margin:0;font-size:.95rem;font-weight:600}.ds-rating-value{display:flex;flex-direction:column;align-items:flex-end;gap:5px}.ds-rating-value strong{font-size:1.6rem;font-weight:650;letter-spacing:-.025em;font-variant-numeric:tabular-nums}.ds-rating-value span{font-size:.7rem}.ds-rating-row{color:var(--text, #1b2921);border-color:var(--line, #d3dcd2)}@media(prefers-color-scheme:dark){.ds-rating-row{color:var(--text, #eef3ec);border-color:var(--line, #364439)}}.ds-rating-icon{color:var(--accent, #275b40)}@media(prefers-color-scheme:dark){.ds-rating-icon{color:var(--accent, #b5d7a9)}}.ds-rating-value span{color:var(--muted, #56635a)}@media(prefers-color-scheme:dark){.ds-rating-value span{color:var(--muted, #b0bcae)}}@media(max-width:479px){.ds-rating-row{gap:12px}}"
+    },
+    {
+      "name": "Error Summary",
+      "kind": "custom",
+      "refersTo": "error-banner",
+      "description": "Text and icon feedback with error surface and a focusable alert.",
+      "html": "<div class=\"ds-error\" role=\"alert\" tabindex=\"-1\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z\"></path></svg><p>Check the highlighted fields and try again.</p></div>",
+      "css": ".ds-error{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-style:solid;border-width:1px;border-radius:var(--radius,12px);font-size:.825rem;line-height:1.65;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-error p{margin:0}.ds-error svg{flex-shrink:0;margin-top:1px}.ds-error{background-color:var(--error-surface, #fff0ef);color:var(--error, #a3222a);border-color:var(--error-line, #e7b9b7)}@media(prefers-color-scheme:dark){.ds-error{background-color:var(--error-surface, #3d2426);color:var(--error, #ffb5b6);border-color:var(--error-line, #795057)}}.ds-error:focus-visible{outline-color:var(--focus, #346c46)}@media(prefers-color-scheme:dark){.ds-error:focus-visible{outline-color:var(--focus, #b5d7a9)}}.ds-error:focus-visible{outline-style:solid;outline-width:3px;outline-offset:4px;}"
+    },
+    {
+      "name": "Account Status",
+      "kind": "custom",
+      "refersTo": "account-status",
+      "description": "A noninteractive text-and-icon readiness indicator, not a chip button.",
+      "html": "<span class=\"ds-account-status\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"></path></svg>Account ready</span>",
+      "css": ".ds-account-status{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;font-family:var(--font-sans, \"Manrope Variable\", \"Manrope\", sans-serif);}.ds-account-status{color:var(--accent, #275b40)}@media(prefers-color-scheme:dark){.ds-account-status{color:var(--accent, #b5d7a9)}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A focused chess club",
+    "overview": "The focused chess club is the working implementation assumption behind the current account interface. It was stated after an optional preference question received no answer; it is not a user-selected identity or a saved personal Taste preference. This document records the code now present, rather than prescribing the appearance of unbuilt gameplay.\n\nChess Room pairs a single green accent with green-tinted neutral surfaces, self-hosted Manrope, and a small set of flat controls. Spacing gives headings and forms room to breathe while rating rows remain compact. A generated knight photograph is decorative context; it does not imply that online play exists. No visual anti-reference was confirmed.",
+    "keyCharacteristics": [
+      "One type family, with weight and scale carrying hierarchy.",
+      "System light and dark schemes using the same semantic color roles.",
+      "Flat surfaces, visible field boundaries, and restrained control feedback.",
+      "Rounded controls and containers, with a circular initial avatar.",
+      "Semantic forms, useful focus movement, and truthful account states."
+    ],
+    "rules": [
+      {
+        "name": "Semantic Theme",
+        "body": "Use the existing semantic color role in both system schemes; do not apply a light-theme literal to an interactive surface that must also work in dark mode.",
+        "section": "colors"
+      },
+      {
+        "name": "Visible Boundary",
+        "body": "Use field-line for resting input boundaries and line for quieter dividers; the two roles are intentionally different.",
+        "section": "colors"
+      },
+      {
+        "name": "Single Family",
+        "body": "Keep interface text in the self-hosted Manrope stack; distinguish headings, labels, and data through the implemented sizes and weights.",
+        "section": "typography"
+      },
+      {
+        "name": "Flat Surface",
+        "body": "Use tonal contrast and dividers for structure; the current interface has no box shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do reuse the semantic light/dark color pairs and the self-hosted Manrope stack.",
+      "Do preserve the distinction between field boundaries, quiet dividers, and focus outlines.",
+      "Do keep form labels, inline error descriptions, busy feedback, and keyboard focus visible.",
+      "Do use the Phosphor icon family and hide decorative icons from assistive technology.",
+      "Do let long account values wrap and allow header actions to adapt at small widths.",
+      "Do describe stored initial ratings as starting ratings and unfinished play as being built."
+    ],
+    "donts": [
+      "Don't add shadows to reproduce depth that the current system expresses with tones and dividers.",
+      "Don't turn every rating row into a separate elevated card; the implemented pattern is a divided list.",
+      "Don't replace text labels or feedback with color or icons alone.",
+      "Don't keep the desktop authentication photograph beside the form below the compact breakpoint.",
+      "Don't add looping, entrance, or parallax animation to the current feedback-only motion vocabulary.",
+      "Don't present this working direction as a learned personal preference or imply that gameplay is already available."
+    ]
+  }
+}
