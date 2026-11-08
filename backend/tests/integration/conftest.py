@@ -25,7 +25,16 @@ def auth_client(request: pytest.FixtureRequest) -> Iterator[TestClient]:
         connection.execute(text("TRUNCATE TABLE users CASCADE"))
         connection.execute(text("TRUNCATE TABLE auth_throttles"))
     engine.dispose()
-    production = getattr(request, "param", "test") == "production"
+    mode = getattr(request, "param", "test")
+    production = mode == "production"
+    if mode in ("America/New_York", "Asia/Kathmandu"):
+        # Apply to every application connection, including pooled connections after
+        # service commits. A SET on the cleanup connection would not affect the app.
+        url = (
+            make_url(url)
+            .update_query_dict({"options": f"-c timezone={mode}"})
+            .render_as_string(hide_password=False)
+        )
     origin = "https://chess.example.com" if production else "http://localhost:5173"
     settings = Settings(
         database_url=SecretStr(url),

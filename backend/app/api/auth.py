@@ -1,3 +1,5 @@
+from datetime import UTC
+
 from fastapi import APIRouter, Depends, Request, Response
 
 from app.api.dependencies import (
@@ -27,7 +29,7 @@ def set_refresh_cookie(response: Response, security: Security, issued: auth.Issu
         key=security.settings.refresh_cookie_name,
         value=issued.refresh_token,
         max_age=max(0, int((issued.expires_at - utc_now()).total_seconds())),
-        expires=issued.expires_at,
+        expires=issued.expires_at.astimezone(UTC),
         path="/",
         secure=security.settings.secure_cookies,
         httponly=True,

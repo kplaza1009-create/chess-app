@@ -1,5 +1,9 @@
 # Phase 4 — comprehensive engine tests and perft diagnostics
 
+The updated snapshot also includes the pre-Phase-5 refresh-cookie timezone
+fix. See `AUTH_TIMEZONE_FIX.md` for the change, timestamp audit, upgrade steps,
+and the new 64-case backend verification results.
+
 This snapshot contains Phases 1–4. The custom engine now has 313 pytest cases,
 including the original 36 acceptance checks. Case counts include parameterized
 examples, such as the 64 square coordinates and color-reversed rule positions.

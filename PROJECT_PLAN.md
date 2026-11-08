@@ -56,7 +56,7 @@ Work on one phase per response and wait for "next phase". Earlier phases may
 include necessary focused tests; Phase 4 adds the comprehensive engine/perft
 suite, and Phase 13 adds broader frontend and integration coverage.
 
-## Requirements for the next phase
+## Original Phase 3 implementation brief (completed)
 
 When the user authorizes Phase 3, inspect the existing backend layout and
 implement an independent Python chess engine that can later support the
@@ -70,3 +70,43 @@ which require a player claim, and how the API exposes that distinction.
 Use appropriate correctness checks during implementation; the comprehensive
 pytest/perft suite remains Phase 4. Do not implement later-phase UI or services
 in the Phase 3 response.
+
+## Accepted requirements from the independent Phase 4 review
+
+These are requirements for the named phases. The auth timezone fix is delivered
+before Phase 5. See AUTH_TIMEZONE_FIX.md for its regression tests and verification.
+
+### Phase 6 prerequisites and draw policy
+
+- Add SAN generation and parsing in the custom engine, with engine_tests cases.
+  Cover legal-move disambiguation (Nbd2, R1e2, and file plus rank when required),
+  captures, pawn capture files, promotions, O-O/O-O-O, and check/mate suffixes.
+  Reject illegal or ambiguous input. Generate SAN from the pre-move position.
+  The moves.san column is required and nonempty, and Phase 9 PGN import needs parsing.
+- Introduce an explicit server mapping from engine outcome reasons to database
+  termination values. Map threefold_repetition and fivefold_repetition to
+  repetition, fifty_moves to fifty_move, and seventy_five_moves to seventy_five_move.
+  Preserve the existing matching reasons. Test that every engine outcome can
+  actually be stored in PostgreSQL with the corresponding result and ended_at.
+- The user selected automatic threefold and 50-move draws for online play.
+  After accepting a move, the server checks claimable_draws() on the resulting
+  position and calls claim_draw when nonempty. Persist the resulting outcome
+  atomically with the move. Keep the engine's claim API. Do not claim based on
+  hypothetical intended moves before they are played. Existing automatic
+  terminal outcomes, including checkmate, retain precedence.
+
+### Phase 7 timeout adjudication
+
+Determine whether the player with time remaining can ever checkmate by any
+legal sequence. The current insufficient_material() checks both players
+together and cannot answer that one-sided question. Add tests for asymmetric
+material before implementing timeout wins and draws.
+
+### Phase 10 AI execution and profiling
+
+Run AI search in a separate process, such as ProcessPoolExecutor, to keep
+FastAPI and WebSocket handling responsive. Bound pending work and handle stale
+results when the game changes. The independent reviewer measured roughly 85k
+perft leaves/sec and about 40% of runtime in Position.__post_init__. Reprofile
+on the target environment and consider a private trusted constructor for
+internal _apply transitions while preserving external input validation.

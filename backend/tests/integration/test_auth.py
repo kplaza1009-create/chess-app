@@ -1,6 +1,8 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
+from email.utils import parsedate_to_datetime
+from http.cookies import SimpleCookie
 from typing import Any
 
 import jwt
@@ -122,6 +124,46 @@ def test_refresh_rotation_and_reuse_revokes_family(auth_client: TestClient) -> N
     assert me(auth_client, second.json()["access_token"]).status_code == 401
     set_cookie(auth_client, newest_cookie)
     assert mutation(auth_client, "refresh").status_code == 401
+
+
+@pytest.mark.parametrize("auth_client", ["America/New_York", "Asia/Kathmandu"], indirect=True)
+def test_refresh_cookie_with_non_utc_database_timezone(auth_client: TestClient) -> None:
+    first = register(auth_client)
+    application = auth_client.app
+
+    async def read_expiry() -> datetime:
+        async with application.state.database.sessions() as session:
+            timezone = await session.scalar(text("SHOW timezone"))
+            assert timezone in ("America/New_York", "Asia/Kathmandu")
+            expiry = await session.scalar(text("SELECT expires_at FROM refresh_sessions LIMIT 1"))
+            assert isinstance(expiry, datetime)
+            assert expiry.utcoffset() != timedelta(0)
+            return expiry
+
+    assert auth_client.portal is not None
+    expires = auth_client.portal.call(read_expiry)
+    original_token = auth_client.cookies["chess_refresh"]
+    for _ in range(2):
+        before = utc_now()
+        response = mutation(auth_client, "refresh")
+        after = utc_now()
+        assert response.status_code == 200, response.text
+        assert response.json()["session_id"] == first["session_id"]
+        cookie: SimpleCookie[str] = SimpleCookie()
+        cookie.load(response.headers["set-cookie"])
+        refresh = cookie["chess_refresh"]
+        assert refresh["expires"].endswith(" GMT")
+        assert parsedate_to_datetime(refresh["expires"]) == expires.astimezone(UTC)
+        assert (
+            int((expires - after).total_seconds())
+            <= int(refresh["max-age"])
+            <= int((expires - before).total_seconds())
+        )
+        claims = jwt.decode(refresh.value, options={"verify_signature": False})
+        assert claims["exp"] == int(expires.timestamp())
+        assert me(auth_client, response.json()["access_token"]).status_code == 200
+    assert auth_client.cookies["chess_refresh"] != original_token
+    assert auth_client.portal.call(read_expiry) == expires
 
 
 def test_concurrent_refresh_reuse_revokes_the_family(auth_client: TestClient) -> None:

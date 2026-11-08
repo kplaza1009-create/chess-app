@@ -19,3 +19,8 @@ dependencies. Open chess-app in Codex to continue.
 
 For interface work, read PRODUCT.md and DESIGN.md. REVIEW.md records the
 Phase 1/2 remake. Do not use python-chess in any later phase.
+
+The pre-Phase-5 auth patch normalizes refresh-cookie expiry to UTC. Read
+AUTH_TIMEZONE_FIX.md for current verification and the timestamp audit.
+PROJECT_PLAN.md now records the accepted Phase 6 SAN, termination mapping,
+and automatic draw requirements, plus Phase 7 timeout and Phase 10 AI notes.
