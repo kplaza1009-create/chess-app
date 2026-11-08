@@ -14,7 +14,8 @@ application from a summary or substitute another technology stack.
   code. Spend more teaching time on WebSockets, move generation, perft, and
   minimax with alpha-beta pruning than on basic React, FastAPI, or PostgreSQL.
 - Complete only the requested phase and then wait for "next phase".
-  Phases 1–4 are complete. Phase 5 is next; wait for user authorization.
+  Phases 1–5 are implemented. Read PHASE5.md for browser-verification limits.
+  Phase 6 is next; wait for user authorization.
 - Use Python type hints and strict TypeScript. Validate external inputs and
   handle failures without exposing credentials or sensitive inputs.
 - Never use python-chess. Implement the move generator in Python ourselves.

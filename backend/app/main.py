@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth import clear_refresh_cookie
 from app.api.auth import router as auth_router
+from app.api.board import router as board_router
 from app.config import Settings, get_settings
 from app.db.session import Database, get_session
 from app.middleware import SecurityHeadersMiddleware
@@ -59,6 +60,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "X-CSRF-Token"],
     )
     application.include_router(auth_router)
+    application.include_router(board_router)
 
     @application.exception_handler(AuthError)
     async def authentication_error(request: Request, exc: AuthError) -> JSONResponse:

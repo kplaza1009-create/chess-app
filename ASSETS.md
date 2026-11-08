@@ -23,3 +23,9 @@ and copied into production frontend output by Vite.
 
 Other dependencies remain declared and locked rather than vendored into the
 source archive. Preserve upstream notices when distributing a compiled build.
+# Phase 5 chess pieces
+
+`frontend/src/components/Piece.tsx` contains original SVG paths created for
+this project. The same geometry is used in the editable Figma reference.
+These pieces do not depend on downloaded artwork or system chess glyphs.
+

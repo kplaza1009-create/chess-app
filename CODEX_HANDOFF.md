@@ -1,8 +1,10 @@
-# Codex handoff — Phase 4 complete
+# Codex handoff — Phase 5 implemented
 
 Read AGENTS.md, PROJECT_PLAN.md, PHASE2.md, PHASE3.md, and PHASE4.md.
-Phases 1–4 are implemented. Phase 5, the chessboard UI, is next and requires
-the user to request the next phase.
+Read PHASE5.md as well. Phases 1–5 are implemented. Phase 6 is next and requires
+the user to request the next phase. The practice board is at /practice and uses
+the stateless /api/v1/board/position endpoint. Real-browser QA was blocked in
+the build environment; run the included frontend/scripts/board-smoke.mjs locally.
 
 The custom standard-library engine is in backend/app/chess. Run it from
 backend with `python3 -m app.chess --perft 3` or `--divide 3`.

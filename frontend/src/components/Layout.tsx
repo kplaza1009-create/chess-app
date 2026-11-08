@@ -13,7 +13,7 @@ export function Layout() {
 
   useLayoutEffect(() => {
     const page = pathname === "/login" ? "Sign in" : pathname === "/register" ? "Create account"
-      : pathname === "/" ? user ? "Your account" : "Welcome" : "Page not found";
+      : pathname === "/practice" ? "Practice board" : pathname === "/" ? user ? "Your account" : "Welcome" : "Page not found";
     document.title = `${page} | Chess Room`;
     main.current?.querySelector<HTMLElement>("h1")?.focus();
   }, [pathname, status]);
@@ -36,6 +36,7 @@ export function Layout() {
           <span>Chess Room<span className="brand-period">.</span></span>
         </Link>
         <nav aria-label="Main navigation" className="main-nav">
+          <Link className="nav-link" to="/practice">Practice</Link>
           {status === "authenticated" && user ? <>
             <span className="nav-username">@{user.username}</span>
             <button className="button-quiet" onClick={() => { void logout(); }} disabled={busy}>

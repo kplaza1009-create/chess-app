@@ -22,7 +22,8 @@ junior, how move generation, perft, WebSockets, and alpha-beta search work.
 The stack and all 16 phases are specified in PROJECT_PLAN.md. This remake
 covers the project foundation and authentication only. Registration, login,
 logout, session restoration, and current-user ratings are implemented.
-Gameplay, AI, matchmaking, history, profiles, and deployment remain later work.
+The custom engine and a local practice board at /practice are also implemented.
+Online gameplay, AI, matchmaking, saved history, profiles, and deployment remain later work.
 The engine must be written in Python without python-chess.
 
 ## Operating Context

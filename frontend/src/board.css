@@ -1,0 +1,35 @@
+.practice { padding-block: 48px 64px; }
+.practice-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 32px; }
+.practice .eyebrow { font-size: .7rem; font-weight: 700; letter-spacing: .15em; color: var(--muted); margin-bottom: 12px; }
+.practice-label { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.practice-layout { display: grid; grid-template-columns: minmax(0, 640px) minmax(240px, 1fr); gap: 56px; }
+.board-column { min-width: 0; }
+.chessboard { display: grid; grid-template-columns: repeat(8, 1fr); aspect-ratio: 1; width: 100%; border: 1px solid #304c3b; }
+.square { position: relative; display: grid; place-items: center; padding: 0; border: 0; aspect-ratio: 1; touch-action: none; user-select: none; min-width: 0; }
+.square.light { background: #e6e9d6; color: #304c3b; }
+.square.dark { background: #64836c; color: #f7f8ed; }
+.square.last { background-image: linear-gradient(#dfc64a55, #dfc64a55); }
+.square.selected { box-shadow: inset 0 0 0 4px #e1ad28; }
+.square.checked { box-shadow: inset 0 0 0 5px #b83239; }
+.square:focus-visible { outline: 3px solid #142d54; outline-offset: -4px; z-index: 2; }
+.piece { width: 86%; height: 86%; z-index: 1; pointer-events: none; }
+.rank, .file { position: absolute; font-size: clamp(9px, 1vw, 12px); font-weight: 700; pointer-events: none; }
+.rank { top: 3px; left: 4px; }.file { bottom: 2px; right: 4px; }
+.move-dot { position: absolute; width: 23%; height: 23%; border-radius: 50%; background: #18332188; pointer-events: none; }
+.capture-ring { position: absolute; inset: 4%; border: 5px solid #18332199; border-radius: 50%; pointer-events: none; }
+.dragging { opacity: .25; }.drag-piece { position: fixed; width: 64px; height: 64px; transform: translate(-50%, -50%); z-index: 100; }
+.player-strip { display: flex; align-items: center; gap: 10px; padding-block: 12px; font-size: .9rem; font-weight: 650; }
+.player-strip > span:last-child { margin-left: auto; font-size: .75rem; color: var(--muted); font-weight: 400; }
+.player-disc { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #526454; }.white-disc { background: #fffdf0; }.black-disc { background: #17291e; }
+.board-selection { min-height: 32px; padding-top: 8px; font-size: .75rem; color: var(--muted); }
+.board-sidebar { padding-top: 44px; }.turn-status { font-size: 1.75rem; margin-bottom: 16px; text-transform: capitalize; }
+.board-sidebar p { color: var(--muted); font-size: .85rem; line-height: 1.8; }
+.board-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 24px 32px; }.board-actions .button-primary { width: 100%; justify-content: center; }
+.practice-note { border-top: 1px solid var(--line); padding-top: 24px; }.practice-note h2 { font-size: 1rem; margin-bottom: 12px; }.practice-note p + p { margin-top: 12px; }
+.position-tools { margin-top: 24px; font-size: .85rem; }.position-tools summary { cursor: pointer; padding-block: 12px; }.position-tools form { display: grid; gap: 12px; }
+.position-tools textarea { width: 100%; min-height: 96px; resize: vertical; border: 1px solid var(--field-line); border-radius: 8px; padding: 10px; background: var(--surface); color: var(--text); font-size: 16px; }
+.board-loading { aspect-ratio: 1; background: var(--subtle); display: grid; place-items: center; }
+.promotion-dialog { margin: auto; max-width: min(440px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--surface); color: var(--text); }
+.promotion-dialog::backdrop { background: #102018aa; }.promotion-dialog p { margin-top: 12px; }.promotion-options { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 24px; }
+@media (max-width: 900px) { .practice-layout { gap: 24px; grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr); } }
+@media (max-width: 767px) { .practice { padding-top: 28px; }.practice-layout { display: block; }.board-column { max-width: 640px; margin-inline: auto; }.board-sidebar { padding-top: 24px; }.piece { font-size: clamp(25px, 9vw, 62px); }.practice-heading { align-items: start; flex-direction: column; gap: 12px; }.practice h1 { font-size: 2rem; }.header-inner { flex-wrap: wrap; gap: 12px; padding-block: 12px; }.main-nav { gap: 12px; } }
