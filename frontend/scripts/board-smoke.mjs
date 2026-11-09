@@ -22,6 +22,13 @@ async function load(fen) {
 try {
   await page.goto(process.env.BOARD_URL ?? "http://127.0.0.1:5173/practice");
   await waitTurn("White");
+  for (const [width, height] of [[1470, 830], [1366, 657], [1280, 720], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const bounds = await page.locator(".board-column").boundingBox();
+    assert(bounds && bounds.y >= 0 && bounds.y + bounds.height <= height,
+      `Board and both player strips must fit ${width}x${height}: ${JSON.stringify(bounds)}`);
+  }
   for (const width of [320, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Overflow at ${width}`);
@@ -47,7 +54,7 @@ try {
   await load("4k3/P7/8/8/8/8/8/4K3 w - - 0 1");
   await move("a7", "a8"); await page.getByRole("dialog").waitFor();
   await page.getByRole("button", { name: "knight", exact: true }).click();
-  await page.getByRole("heading", { name: "insufficient material", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "Draw — insufficient material", exact: true }).waitFor();
   assert.match(await square("a8").getAttribute("aria-label"), /White knight/);
   await load("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
   await move("e1", "g1"); await waitTurn("Black");
@@ -58,9 +65,14 @@ try {
   await page.getByRole("button", { name: "Reset board" }).click(); await waitTurn("White");
   await move("f2", "f3"); await waitTurn("Black"); await move("e7", "e5"); await waitTurn("White");
   await move("g2", "g4"); await waitTurn("Black"); await move("d8", "h4");
-  await page.getByRole("heading", { name: "checkmate", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "Checkmate — Black wins", exact: true }).waitFor();
   assert.match(await square("e1").getAttribute("aria-label"), /in check/);
   await page.setViewportSize({ width: 390, height: 844 });
+  await square("e1").scrollIntoViewIfNeeded();
+  for (const locator of [page.getByRole("heading", { name: "Checkmate — Black wins" }), page.getByRole("button", { name: "Undo move" })]) {
+    const bounds = await locator.boundingBox();
+    assert(bounds && bounds.y >= 0 && bounds.y + bounds.height <= 844, "Mobile status and Undo stay visible");
+  }
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
   await page.screenshot({ path: "/tmp/chess-phase5-mobile.png", fullPage: true });
   assert.deepEqual(errors, []);

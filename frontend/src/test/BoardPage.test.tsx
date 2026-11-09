@@ -7,6 +7,18 @@ import { loadPosition, START_FEN, type BoardState } from "../api/board";
 vi.mock("../api/board", async importOriginal => ({ ...await importOriginal<typeof import("../api/board")>(), loadPosition: vi.fn() }));
 const state: BoardState = { fen: START_FEN, board: [..."RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr"], turn: "w", check: false, ending: null, legal_moves: ["e2e3", "e2e4"] };
 beforeEach(() => { vi.mocked(loadPosition).mockReset(); HTMLElement.prototype.setPointerCapture = vi.fn(); });
+it.each([
+  [null, "w", "White to move"],
+  ["checkmate", "w", "Checkmate — Black wins"],
+  ["checkmate", "b", "Checkmate — White wins"],
+  ["stalemate", "w", "Draw — stalemate"],
+  ["insufficient_material", "w", "Draw — insufficient material"],
+] as const)("announces %s with a semantic heading", async (ending, turn, title) => {
+  vi.mocked(loadPosition).mockResolvedValue({ ...state, ending, turn });
+  render(<BoardPage />);
+  const heading = await screen.findByRole("heading", { name: title });
+  expect(heading.closest('[role="status"]')).not.toBeNull();
+});
 it("recovers after initial failure", async () => {
   vi.mocked(loadPosition).mockRejectedValueOnce(new Error("Connection failed")).mockResolvedValue(state);
   render(<BoardPage />);

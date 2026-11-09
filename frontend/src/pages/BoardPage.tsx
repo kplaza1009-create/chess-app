@@ -38,21 +38,27 @@ export function BoardPage() {
   }, []);
   const state = entry?.state;
   const turn = state?.turn === "b" ? "Black" : "White";
-  const status = state?.ending ? state.ending.replaceAll("_", " ") : `${turn} to move${state?.check ? " — check" : ""}`;
+  const status = state?.ending === "checkmate"
+    ? `Checkmate — ${state.turn === "w" ? "Black" : "White"} wins`
+    : state?.ending ? `Draw — ${state.ending.replaceAll("_", " ")}`
+    : `${turn} to move${state?.check ? " — check" : ""}`;
   return <section className="practice page-width">
     <div className="practice-heading"><div><p className="eyebrow">THE PRACTICE ROOM</p><h1 tabIndex={-1}>Your next move.</h1></div><span className="practice-label">Local · Unrated</span></div>
+    <div className="board-toolbar">
+      <div role="status"><h2 className="turn-status">{busy ? "Checking position…" : state ? status : "Let’s set up"}</h2></div>
+      <div className="board-actions"><button className="button-quiet" disabled={busy || history.length < 2} onClick={() => { const previous = history.at(-2); if (previous) { setHistory(history.slice(0, -1)); setFen(previous.state.fen); } }}>Undo move</button>
+        <button className="button-quiet" disabled={busy} onClick={() => setFlipped(!flipped)}>Flip board</button>
+        <button className="button-primary" disabled={busy} onClick={() => { void update(START_FEN); }}>Reset board</button></div>
+    </div>
     <div className="practice-layout"><div className="board-column">
       <div className="player-strip"><span className={`player-disc ${flipped ? "white-disc" : "black-disc"}`} />{flipped ? "White" : "Black"}<span>Local player</span></div>
       {state ? <Chessboard state={state} flipped={flipped} busy={busy} lastMove={entry.move}
         onMove={move => { void update(state.fen, move); }} /> : <div className="board-loading" role="status">{busy ? "Preparing your board…" : "Board unavailable"}</div>}
       <div className="player-strip"><span className={`player-disc ${flipped ? "black-disc" : "white-disc"}`} />{flipped ? "Black" : "White"}<span>Local player</span></div>
     </div><aside className="board-sidebar">
-      <p className="eyebrow">ON THE BOARD</p><h2 className="turn-status" role="status">{busy ? "Checking position…" : state ? status : "Let’s set up"}</h2>
+      <p className="eyebrow">ON THE BOARD</p>
       <p id="board-help">Play both sides. Drag a piece, or select it and then its destination. On a keyboard, use arrow keys and Enter. Escape clears selection.</p>
       {error && <div className="error-banner" role="alert"><p>{error}</p><button className="button-quiet" disabled={busy} onClick={() => { void update(state?.fen ?? START_FEN); }}>Reload position</button></div>}
-      <div className="board-actions"><button className="button-quiet" disabled={busy} onClick={() => setFlipped(!flipped)}>Flip board</button>
-        <button className="button-quiet" disabled={busy || history.length < 2} onClick={() => { const previous = history.at(-2); if (previous) { setHistory(history.slice(0, -1)); setFen(previous.state.fen); } }}>Undo move</button>
-        <button className="button-primary" disabled={busy} onClick={() => { void update(START_FEN); }}>Reset board</button></div>
       <section className="practice-note"><h2>A place to explore</h2><p>This board checks every move with our chess engine. Positions are kept only in this tab; refresh starts a new board. Online games and clocks arrive in later phases.</p><p>Repetition claims and saved game history are not tracked in this practice view.</p></section>
       <details className="position-tools"><summary>Set up a position</summary><form onSubmit={event => { event.preventDefault(); void update(fen); }}>
         <label htmlFor="fen">FEN position</label><textarea id="fen" value={fen} onChange={event => setFen(event.target.value)} maxLength={120} required disabled={busy} spellCheck={false} />

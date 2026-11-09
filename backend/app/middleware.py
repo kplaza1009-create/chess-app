@@ -16,19 +16,19 @@ class SecurityHeadersMiddleware:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
-        is_auth = scope["path"].startswith("/api/v1/auth/")
+        is_api = scope["path"].startswith("/api/v1/")
 
         async def secure_send(message: Message) -> None:
             if message["type"] == "http.response.start":
                 headers = MutableHeaders(scope=message)
                 headers["X-Content-Type-Options"] = "nosniff"
                 headers["Referrer-Policy"] = "same-origin"
-                if is_auth:
+                if is_api:
                     headers["Cache-Control"] = "no-store"
                     headers["Pragma"] = "no-cache"
             await send(message)
 
-        if is_auth and scope["method"] == "POST":
+        if is_api and scope["method"] == "POST":
             content_length = Headers(scope=scope).get("content-length", "")
             if content_length.isascii() and content_length.isdecimal():
                 if len(content_length) > 20 or int(content_length) > AUTH_BODY_LIMIT:

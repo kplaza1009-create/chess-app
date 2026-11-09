@@ -43,6 +43,11 @@ services:
       - --port
       - "8000"
       - --reload
+      - --ws-max-size
+      - "8192"
+      - --ws-max-queue
+      - "8"
+      - --no-proxy-headers
     volumes:
       - ./backend:/app
     ports:

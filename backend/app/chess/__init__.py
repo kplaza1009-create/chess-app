@@ -14,6 +14,7 @@ from .engine import (
     square,
     square_name,
 )
+from .notation import parse_san, san
 
 __all__ = [
     "START_FEN",
@@ -26,6 +27,8 @@ __all__ = [
     "Position",
     "divide",
     "perft",
+    "parse_san",
+    "san",
     "square",
     "square_name",
 ]

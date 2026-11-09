@@ -1,10 +1,31 @@
-# Codex handoff — Phase 5 implemented
+# Codex handoff — Phase 7 implemented, browser acceptance pending
+
+Read PHASE7.md first. Persistent clocks now use database timestamps, row locks,
+increments, a background expiration worker and two browser clock displays.
+New games are timed; existing games with null turn_started_at stay untimed.
+The timeout material policy is not a complete dead-position solver; see limits.
+Phase 8 requires the user's next-phase instruction. The notes below are history.
+
+Read PHASE6.md first. Phase 6 is now implemented: participant-only unrated rooms,
+WebSockets, durable versioned moves, reconnect, SAN and automatic draw claims.
+No clocks are running yet. Phase 7 is next. The notes below describe the prior
+baseline. Do not interpret them as a request to reimplement Phase 6.
+Current results: 406 backend passed/9 slow skips; 46 frontend passed; build,
+Ruff, mypy, Alembic and actual Uvicorn network WebSocket smoke passed.
+The user manually verified two-browser room creation. The browser offline-event
+regression is covered by Vitest; the corrected game-smoke script still needs a
+local rerun because Chromium cannot launch in the build environment.
 
 Read AGENTS.md, PROJECT_PLAN.md, PHASE2.md, PHASE3.md, and PHASE4.md.
 Read PHASE5.md as well. Phases 1–5 are implemented. Phase 6 is next and requires
 the user to request the next phase. The practice board is at /practice and uses
 the stateless /api/v1/board/position endpoint. Real-browser QA was blocked in
 the build environment; run the included frontend/scripts/board-smoke.mjs locally.
+
+The Phase 5 independent-review patch fixes live-region heading semantics,
+adds viewport-height board sizing and mobile sticky controls, names terminal
+results, and rate-limits practice requests using PostgreSQL (120/IP/minute).
+PHASE5.md records the new 380/43 test counts and pending browser layout checks.
 
 The custom standard-library engine is in backend/app/chess. Run it from
 backend with `python3 -m app.chess --perft 3` or `--divide 3`.

@@ -43,10 +43,11 @@ move generator; there is no JavaScript chess library or duplicate rules engine.
 It validates the position and move, then returns the board, legal moves, check
 and terminal-position reason. The synchronous FastAPI route runs its CPU work
 in the thread pool. This is one-position evaluation, not perft or AI search.
-Requests do not write database rows, cookies, ratings or games. No auth or CSRF
-token is required for this stateless calculation. Normal middleware body-size
-and response-security controls still apply. Deployment rate limits and broader
-abuse protection require the planned security review before public release.
+Requests update shared rate-limit counters, but never cookies, ratings or games.
+No auth or CSRF token is required for this position calculation. Normal middleware
+body-size and response-security controls still apply. The review patch adds
+120 requests/IP/minute; deployment proxy trust and ingress-wide abuse protection
+must also be configured before public release.
 
 `BoardPage` handles requests, retains confirmed positions for local undo, blocks
 duplicate submissions while pending, and ignores responses after unmount. A
@@ -73,9 +74,9 @@ docker compose --profile test run --build --rm test
 docker compose --profile test run --build --rm frontend_test
 ```
 
-Expected routine results: 379 backend/engine cases passed with nine deliberately
-skipped deep perft cases; 38 frontend cases passed. `pytest tests -q` alone now
-runs 75 backend cases, including the 11 new practice-API cases. All 40 database
+Expected routine results after the review patch: 380 backend/engine cases passed with nine deliberately
+skipped deep perft cases; 43 frontend cases passed. `pytest tests -q` alone now
+runs 76 backend cases, including the 11 practice-API cases. All 41 database
 cases require the dedicated test database supplied by Compose.
 
 For development without Docker, follow PHASE2.md for the API/environment setup,
@@ -100,6 +101,47 @@ Chromium binary. Touch-device testing should additionally check tap, drag,
 pointer cancellation and scrolling outside the board on an actual phone.
 
 ## Verification actually performed
+
+### Independent-review fixes (November 8, 2026)
+
+- Status now wraps a semantic h2 in a live region. Sentence case is preserved.
+  Checkmate names the winning color; terminal draws explicitly say Draw.
+- The practice route uses a compact header and a viewport-height-limited board.
+  Status and controls sit above the board and stay sticky on narrow screens.
+  The smoke script checks the full board column, including both player strips,
+  at 1470x830, 1366x657, 1280x720 and 1920x1080, plus mobile status/Undo visibility.
+- The position endpoint now uses the existing shared PostgreSQL limiter:
+  120 requests per peer IP per 60-second fixed window, returning 429 and
+  Retry-After before engine evaluation. The rule tests override this dependency;
+  a real-database regression checks the boundary, spoofed forwarding headers,
+  no engine work on rejection, and recovery after expiry.
+  Practice requests now need PostgreSQL. No schema migration was needed.
+  This limits individual clients; deployment still needs trusted proxy setup
+  and ingress-wide traffic limits. WebSocket message limits remain Phase 6 work.
+- Checks actually rerun: 380 backend/engine passed, 9 deliberate deep-perft
+  skips, 43 frontend passed, TypeScript/Vite build, Ruff, mypy (22 source files),
+  and Alembic upgrade/check with no schema drift on real PostgreSQL 17.11
+  configured for America/New_York.
+- The updated browser script was attempted with system Chromium. Chromium
+  failed before navigation: process_singleton_posix.cc socket() failed with
+  Operation not permitted. Thus the new layout assertions have NOT passed here.
+  The reviewer's successful earlier browser run is user-reported evidence for
+  the heading-only correction, not verification of this new layout.
+  Docker build, deep perft, and coverage were not rerun.
+
+From the updated project root, preserve your existing .env and database volume:
+
+```bash
+docker compose up --build -d
+docker compose --profile test run --build --rm test
+docker compose --profile test run --build --rm frontend_test
+cd frontend
+npm ci
+npx playwright install chromium
+node scripts/board-smoke.mjs
+```
+
+### Original Phase 5 authoring results
 
 - Python 3.12 and PostgreSQL 17.11: 379 passed, 9 deep-perft skips.
 - Alembic upgrade and schema check: passed, no schema drift.

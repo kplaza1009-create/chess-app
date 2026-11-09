@@ -9,7 +9,7 @@ RUN pip install --no-deps -r requirements.lock
 COPY --chown=chess:chess . .
 USER chess
 EXPOSE 8000
-CMD ["sh", "-c", "exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT:-8000} --ws-max-size 8192 --ws-max-queue 8 --no-proxy-headers"]
 
 FROM base AS development
 USER root

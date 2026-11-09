@@ -2,10 +2,12 @@
 
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.api.dependencies import SecurityDep, SessionDep
 from app.chess import START_FEN, ChessError, Game, Position
+from app.services.rate_limit import enforce_rate_limit
 
 router = APIRouter(prefix="/api/v1/board", tags=["practice board"])
 
@@ -25,7 +27,18 @@ class BoardResponse(BaseModel):
     ending: str | None
 
 
-@router.post("/position", response_model=BoardResponse)
+async def limit_board_requests(
+    request: Request, session: SessionDep, security: SecurityDep
+) -> None:
+    # Use the ASGI peer address, never a caller-supplied forwarding header.
+    # Production proxy trust must be explicitly configured at the server.
+    address = request.client.host if request.client else "unknown"
+    await enforce_rate_limit(session, security.throttle_key("board", address), 120, 60)
+
+
+@router.post(
+    "/position", response_model=BoardResponse, dependencies=[Depends(limit_board_requests)]
+)
 def inspect_position(data: BoardRequest) -> BoardResponse:
     # A synchronous route keeps CPU work off FastAPI's event loop. The bounded
     # input accepts one position and at most one move, never arbitrary searches.

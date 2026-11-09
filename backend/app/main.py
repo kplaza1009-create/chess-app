@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -16,9 +16,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.auth import clear_refresh_cookie
 from app.api.auth import router as auth_router
 from app.api.board import router as board_router
+from app.api.games import router as games_router
 from app.config import Settings, get_settings
 from app.db.session import Database, get_session
 from app.middleware import SecurityHeadersMiddleware
+from app.services.clocks import clock_worker
 from app.services.security import AuthError, Security
 
 logger = logging.getLogger(__name__)
@@ -35,12 +37,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         database = Database(settings)
         application.state.database = database
+        application.state.game_connections = {}
+        clocks: asyncio.Task[None] | None = None
         try:
             security = Security(settings)
             await security.initialize()
             application.state.security = security
+            clocks = asyncio.create_task(clock_worker(database))
             yield
         finally:
+            if clocks is not None:
+                clocks.cancel()
+                with suppress(asyncio.CancelledError):
+                    await clocks
             await database.close()
 
     application = FastAPI(
@@ -61,6 +70,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     application.include_router(auth_router)
     application.include_router(board_router)
+    application.include_router(games_router)
 
     @application.exception_handler(AuthError)
     async def authentication_error(request: Request, exc: AuthError) -> JSONResponse:

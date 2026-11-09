@@ -23,7 +23,9 @@ The stack and all 16 phases are specified in PROJECT_PLAN.md. This remake
 covers the project foundation and authentication only. Registration, login,
 logout, session restoration, and current-user ratings are implemented.
 The custom engine and a local practice board at /practice are also implemented.
-Online gameplay, AI, matchmaking, saved history, profiles, and deployment remain later work.
+Participant-only unrated, untimed multiplayer rooms now exist at /games with
+WebSocket state sync, durable moves and reconnect. See PHASE6.md for acceptance
+limits. AI, matchmaking, history browsing, profiles, and deployment remain later work.
 The engine must be written in Python without python-chess.
 
 ## Operating Context

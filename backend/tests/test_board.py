@@ -2,11 +2,13 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.board import router
+from app.api.board import limit_board_requests, router
 from app.chess import START_FEN, Position
 
 app = FastAPI()
 app.include_router(router)
+# Pure rule/response tests; real throttling is exercised against PostgreSQL.
+app.dependency_overrides[limit_board_requests] = lambda: None
 client = TestClient(app)
 
 
