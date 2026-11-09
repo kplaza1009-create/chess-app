@@ -24,9 +24,7 @@ class Settings(BaseSettings):
     access_token_seconds: int = Field(default=300, ge=30, le=900)
     refresh_token_days: int = Field(default=30, ge=1, le=90)
     bcrypt_rounds: int = Field(default=12, ge=4, le=14)
-    cors_origins: list[str] = Field(
-        default_factory=lambda: ["http://localhost:5173"], min_length=1
-    )
+    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"], min_length=1)
 
     @property
     def secure_cookies(self) -> bool:

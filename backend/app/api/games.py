@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import time
+from datetime import timedelta
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
@@ -13,12 +14,13 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.dependencies import SecurityDep, SessionDep, UserDep, current_user
+from app.api.dependencies import SecurityDep, SessionDep, UserDep, current_user, session_user
 from app.chess import ChessError
 from app.db.models import Game, GameKind, Speed, User
 from app.db.session import Database
-from app.services.clocks import PRESETS, database_now, expire
+from app.services.clocks import PRESETS, database_now
 from app.services.games import locked_game, play, snapshot
+from app.services.notifications import GameNotifications
 from app.services.rate_limit import enforce_rate_limit
 from app.services.security import AuthError, Security
 
@@ -52,6 +54,7 @@ async def create_game(
         if opponent is None or opponent.id == user.id:
             raise HTTPException(422, "Choose another registered player")
         initial, increment = PRESETS[data.time_control]
+        now = await database_now(session)
         game = Game(
             kind=GameKind.MULTIPLAYER,
             white_user_id=user.id,
@@ -66,7 +69,8 @@ async def create_game(
             increment_ms=increment,
             white_remaining_ms=initial,
             black_remaining_ms=initial,
-            turn_started_at=await database_now(session),
+            turn_started_at=now,
+            first_move_deadline=now + timedelta(seconds=30),
         )
         session.add(game)
         await session.flush()
@@ -98,6 +102,10 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
     slots: dict[str, int] = ws.app.state.game_connections
     key: str | None = None
     accepted = False
+    notifications: GameNotifications = ws.app.state.game_notifications
+    changed: asyncio.Event | None = None
+    receive_task: asyncio.Task[str] | None = None
+    wake_task: asyncio.Task[bool] | None = None
 
     async def send(data: dict[str, Any]) -> None:
         async with asyncio.timeout(5):
@@ -139,6 +147,7 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
         ):
             raise ValueError("Invalid authentication frame")
         credential = HTTPAuthorizationCredentials(scheme="Bearer", credentials=auth["token"])
+        claims = security.decode(auth["token"], "access")
         async with database.sessions() as session:
             user = await current_user(session, security, credential)
         user_key = str(user.id)
@@ -150,15 +159,15 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
         slots[key] = slots.get(key, 0) + 1
         sent_version = -1
         heartbeat = time.monotonic()
+        changed = notifications.subscribe(game_id)
+        receive_task = asyncio.create_task(receive_text())
         while True:
-            # ponytail: 2 polls/socket/second; use LISTEN/NOTIFY at higher scale.
-            # Poll committed versions across workers. Each socket owns its send loop;
-            # no unbounded broadcast queue and no transaction held while awaiting input.
+            # Clear before reading: a commit during the read must wake the next pass.
+            changed.clear()
             async with database.sessions() as session:
-                user = await current_user(session, security, credential)
+                user = await session_user(session, claims)
                 async with session.begin():
-                    game = await locked_game(session, game_id, user.id, write=True)
-                    expire(game, await database_now(session))
+                    game = await locked_game(session, game_id, user.id)
                     state = (
                         await snapshot(session, game, user.id)
                         if game.version != sent_version or time.monotonic() - heartbeat >= 15
@@ -170,11 +179,17 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
             if time.monotonic() - heartbeat >= 15:
                 await send({"type": "heartbeat"})
                 heartbeat = time.monotonic()
-            try:
-                async with asyncio.timeout(0.5):
-                    raw = await receive_text()
-            except TimeoutError:
+            wake_task = asyncio.create_task(changed.wait())
+            done, _ = await asyncio.wait(
+                {receive_task, wake_task}, timeout=5, return_when=asyncio.FIRST_COMPLETED
+            )
+            wake_task.cancel()
+            await asyncio.gather(wake_task, return_exceptions=True)
+            wake_task = None
+            if receive_task not in done:
                 continue
+            raw = receive_task.result()
+            receive_task = asyncio.create_task(receive_text())
             if len(raw) > 1024:
                 raise ValueError("Oversized message")
             async with database.sessions() as session:
@@ -182,7 +197,7 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
                     session, security.throttle_key("ws-message", user_key), 120, 60
                 )
                 # Revalidate before every write, including after waiting for a frame.
-                user = await current_user(session, security, credential)
+                user = await session_user(session, claims)
                 try:
                     message = MoveMessage.model_validate_json(raw)
                     async with session.begin():
@@ -190,6 +205,7 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
                         await play(
                             session, game, user.id, message.version, message.request_id, message.uci
                         )
+                    notifications.notify(game_id)
                     sent_version = -1
                 except (ValidationError, ChessError, HTTPException) as exc:
                     detail = (
@@ -212,6 +228,12 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
         logger.warning("Game database operation unavailable")
         await ws.close(code=1013)
     finally:
+        if changed is not None:
+            notifications.unsubscribe(game_id, changed)
+        tasks = [task for task in (receive_task, wake_task) if task is not None]
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
         if key is not None:
             slots[key] -= 1
             if slots[key] == 0:

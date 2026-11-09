@@ -88,6 +88,17 @@ it("requests a fresh ticket after a dropped connection", async () => {
   expect(authorized).toHaveBeenCalledTimes(2);
 });
 
+it("names the opponent and renders an abort without calling it a draw", async () => {
+  renderGame();
+  await waitFor(() => expect(sockets).toHaveLength(1));
+  act(() => sockets[0]?.onmessage?.({ data: JSON.stringify({
+    type: "state", id: gameId, version: 1, color: "w", result: "*",
+    status: "aborted", opponent: "blackplayer", position: { ...position, ending: "aborted", legal_moves: [] }, moves: [],
+  }) } as MessageEvent));
+  expect(await screen.findByRole("heading", { name: "Game aborted — first move missed" })).toBeVisible();
+  expect(screen.getByText("blackplayer")).toBeVisible();
+});
+
 it("shows reconnecting immediately when the browser goes offline", async () => {
   renderGame();
   await waitFor(() => expect(sockets).toHaveLength(1));

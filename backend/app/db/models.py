@@ -121,6 +121,7 @@ class Game(CreatedAt, Base):
             "white_remaining_ms >= 0 AND black_remaining_ms >= 0", name="clocks_nonnegative"
         ),
         CheckConstraint("ply_count >= 0 AND version >= 0", name="counters_nonnegative"),
+        CheckConstraint("status <> 'aborted' OR NOT rated", name="aborted_unrated"),
         CheckConstraint(
             "(status = 'active' AND result = '*' AND termination IS NULL AND ended_at IS NULL) "
             "OR (status = 'finished' AND result IN ('1-0', '0-1', '1/2-1/2') "
@@ -162,6 +163,7 @@ class Game(CreatedAt, Base):
     white_remaining_ms: Mapped[int] = mapped_column(Integer)
     black_remaining_ms: Mapped[int] = mapped_column(Integer)
     turn_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    first_move_deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     result: Mapped[str] = mapped_column(String(7), server_default=text("'*'"))
     termination: Mapped[str | None] = mapped_column(String(32))
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

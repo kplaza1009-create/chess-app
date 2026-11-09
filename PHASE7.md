@@ -2,10 +2,11 @@
 
 This snapshot contains Phases 1–7, including the Phase 6 browser-offline handler.
 New rooms offer 1+0, 3+2, 5+0, 10+0 and 15+10. Games remain unrated.
-White's clock starts immediately when the room is created. Have the other
-player ready; the creation form explains this policy. Existing Phase 6 games
-have a null turn-start timestamp and remain untimed. No migration is needed:
-the original schema already has all required fields. Never reset the database.
+The review patch gives White 30 seconds for the first move, then Black 30 seconds
+for theirs. Both clocks stay paused during these opening moves; increments begin
+on subsequent moves. Missing a deadline aborts the game, without a win or loss.
+Existing games retain their prior clock policy. Migration 0003 adds the first-move
+deadline and prevents aborted games from being rated. Never reset the database.
 
 ## Upgrade on your Mac
 
@@ -33,8 +34,9 @@ docker compose ps
 
 Open http://localhost:5173/games. Use Safari and Chrome with separate accounts.
 Choose 3+2, create a room with the other account's username, and open the same
-room URL in the other browser. White's time counts down; after a legal white
-move it receives two seconds and Black starts counting down. Refreshing must
+room URL in the other browser. Make the two opening moves before their deadlines.
+White's time then counts down; after its next legal move it receives two seconds
+and Black starts counting down. Refreshing must
 preserve the position and elapsed time. Disconnecting does not pause clocks.
 An existing untimed room will not acquire clocks: create a new room to test.
 
@@ -65,7 +67,7 @@ node scripts/game-smoke.mjs
 The game smoke checks time-control selection, both clocks, synchronized moves,
 reload, offline reconnect, and responsive widths. Repeated runs may hit the
 10 registrations/hour/IP limit; wait for that limit instead of disabling it.
-To manually test timeout, create a 1+0 room and let White's minute expire.
+To manually test timeout, create a 1+0 room, play e4 and e5, and let White's minute expire.
 Both players should receive Black wins — timeout, and moves should be disabled.
 
 ## Why the clocks work this way
@@ -90,8 +92,15 @@ multiple workers cannot finish the same game twice. Restarted workers settle
 overdue games from persisted timestamps. Service downtime counts as elapsed
 time. Timeouts and moves use the same row lock and increment the game version.
 
-Snapshots carry remaining balances, time control and running state. They are
-sent after changes, on reconnect, and every 15 seconds. The browser estimates
+Snapshots carry remaining balances, time control, first-move deadline, opponent
+name and running state. Commits wake local sockets immediately and publish a
+transactional PostgreSQL NOTIFY for other API processes. Each process maintains
+one dedicated LISTEN connection with reconnect and resync. Notifications contain
+only game IDs; authorized readers load the committed state. Events coalesce,
+so slow clients cannot create an unbounded broadcast queue. A five-second poll
+is a recovery fallback, with shared snapshot locks rather than exclusive locks.
+All game endings use database time. Snapshots also refresh every 15 seconds.
+The browser estimates
 elapsed time with performance.now(), not the user's adjustable wall clock.
 Network latency can make the displayed estimate optimistic; only the server
 decides the result. Local zero is not a result. Clocks use timer semantics with
@@ -111,13 +120,19 @@ can require position-specific analysis. Do not claim full FIDE dead-position
 adjudication. FIDE article 6.9 describes the stronger possible-legal-sequence
 standard: https://handbook.fide.com/chapter/e012023 .
 
+Access-token expiry is checked at the authenticated handshake. Existing sockets
+retain that verified identity and check the user's active status, family revocation
+and refresh-session expiry before every move and at least every five seconds.
+Expired credentials cannot open new sockets. Logout/revocation still disconnects
+established sockets; a five-minute JWT expiry alone does not interrupt a game.
+
 There is no ready/accept handshake, lag compensation, outage refund, or dedicated
 clock service. The half-second worker scans active games; add a deadline index
 or scheduler after profiling larger workloads. Matchmaking and ELO are Phase 8.
 
 ## Verification record
 
-Backend: 421 passed, 9 deeper perft tests skipped. This includes the added
+Baseline before review: 421 passed, 9 deeper perft tests skipped. This includes the added
 timeout/move race, increment idempotence, persistence and disconnected expiry.
 Actual HTTP and WebSocket smoke passed: two users, synchronized moves, SAN
 checkmate and reconnect.
@@ -130,4 +145,7 @@ execution environment. Downloading Playwright's bundled browser also failed.
 The browser smoke, visual appearance, Docker/Nginx runtime, multiworker load,
 long outages, deep perft and coverage were not verified in this phase.
 
-Use the browser commands above before treating Phase 7 as accepted for release.
+The independent reviewer subsequently passed both browser smokes, the layout
+assertions and a real two-browser timeout on the baseline. See REVIEW_FIXES.md
+for the latest patch's separate verification results. Repeat browser acceptance
+after upgrading to this patch.

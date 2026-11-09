@@ -1,5 +1,6 @@
 """Durable game operations. Lock the game row before reading or writing its moves."""
 
+from datetime import timedelta
 from typing import Any
 from uuid import UUID
 
@@ -11,9 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.chess import Game as EngineGame
 from app.chess import Position
 from app.chess.notation import san
-from app.db.models import Game, GameStatus, Move
+from app.db.models import Game, GameStatus, Move, User
 from app.services.clocks import database_now, expire, remaining
-from app.services.security import utc_now
+from app.services.notifications import notify_transaction
 
 TERMINATIONS = {
     "checkmate": "checkmate",
@@ -57,16 +58,25 @@ async def snapshot(session: AsyncSession, game: Game, user_id: UUID) -> dict[str
     ).all()
     now = await database_now(session)
     white, black = remaining(game, now)
+    opponent_id = game.black_user_id if user_id == game.white_user_id else game.white_user_id
+    opponent = await session.scalar(select(User.username).where(User.id == opponent_id))
     return {
         "type": "state",
         "id": str(game.id),
         "version": game.version,
         "color": "w" if user_id == game.white_user_id else "b",
         "result": game.result,
+        "status": game.status.value,
+        "opponent": opponent,
         "clock": {
             "white_ms": white,
             "black_ms": black,
-            "running": game.turn_started_at is not None and game.status == GameStatus.ACTIVE,
+            "running": game.turn_started_at is not None
+            and game.status == GameStatus.ACTIVE
+            and game.first_move_deadline is None,
+            "first_move_ms": max(0, int((game.first_move_deadline - now).total_seconds() * 1000))
+            if game.first_move_deadline is not None and game.status == GameStatus.ACTIVE
+            else None,
             "timed": game.turn_started_at is not None,
             "initial_ms": game.initial_time_ms,
             "increment_ms": game.increment_ms,
@@ -104,6 +114,7 @@ async def play(
     now = await database_now(session)
     if expire(game, now):
         await session.flush()
+        await notify_transaction(session, game.id)
         return
 
     def advance() -> tuple[EngineGame, str]:
@@ -119,7 +130,12 @@ async def play(
         return engine, notation
 
     engine, notation = await to_thread.run_sync(advance)
-    if game.turn_started_at is not None:
+    if game.first_move_deadline is not None:
+        game.turn_started_at = await database_now(session)
+        game.first_move_deadline = (
+            game.turn_started_at + timedelta(seconds=30) if game.ply_count == 0 else None
+        )
+    elif game.turn_started_at is not None:
         white, black = remaining(game, now)
         if game.current_fen.split()[1] == "w":
             white += game.increment_ms
@@ -136,7 +152,7 @@ async def play(
         game.status = GameStatus.FINISHED
         game.result = outcome.result
         game.termination = TERMINATIONS[outcome.reason]
-        game.ended_at = utc_now()
+        game.ended_at = await database_now(session)
     session.add(
         Move(
             game_id=game.id,
@@ -150,3 +166,4 @@ async def play(
         )
     )
     await session.flush()
+    await notify_transaction(session, game.id)

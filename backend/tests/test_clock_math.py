@@ -39,6 +39,17 @@ def test_timezone_backward_clock_and_legacy() -> None:
     assert not expire(item, NOW + timedelta(days=1))
 
 
+def test_first_move_deadline_does_not_charge_clock_and_aborts_exactly() -> None:
+    item = game()
+    item.first_move_deadline = NOW + timedelta(seconds=30)
+    item.rated = True
+    assert remaining(item, NOW + timedelta(seconds=29)) == (1000, 2000)
+    assert not expire(item, NOW + timedelta(milliseconds=29999))
+    assert expire(item, NOW + timedelta(seconds=30))
+    assert item.status == GameStatus.ABORTED
+    assert item.result == "*" and item.rated is False
+
+
 @pytest.mark.parametrize(
     ("fen", "color", "expected"),
     [

@@ -16,7 +16,10 @@ def update(game_id: str, assignment: str) -> None:
     engine = create_engine(os.environ["TEST_DATABASE_URL"])
     try:
         with engine.begin() as connection:
-            connection.execute(text(f"UPDATE games SET {assignment} WHERE id=:id"), {"id": game_id})
+            connection.execute(
+                text(f"UPDATE games SET first_move_deadline=NULL, {assignment} WHERE id=:id"),
+                {"id": game_id},
+            )
     finally:
         engine.dispose()
 

@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.chess import Position
 from app.db.models import Game, GameStatus
 from app.db.session import Database
+from app.services.notifications import GameNotifications, notify_transaction
 
 PRESETS = {
     "1+0": (60000, 0),
@@ -30,7 +31,11 @@ async def database_now(session: AsyncSession) -> datetime:
 
 def remaining(game: Game, now: datetime) -> tuple[int, int]:
     white, black = game.white_remaining_ms, game.black_remaining_ms
-    if game.turn_started_at is not None and game.status == GameStatus.ACTIVE:
+    if (
+        game.turn_started_at is not None
+        and game.status == GameStatus.ACTIVE
+        and game.first_move_deadline is None
+    ):
         elapsed = max(0, int((now - game.turn_started_at).total_seconds() * 1000))
         if game.current_fen.split()[1] == "w":
             white = max(0, white - elapsed)
@@ -71,6 +76,16 @@ def has_mating_material(position: Position, color: str) -> bool:
 def expire(game: Game, now: datetime) -> bool:
     if game.turn_started_at is None or game.status != GameStatus.ACTIVE:
         return False
+    if game.first_move_deadline is not None:
+        if now < game.first_move_deadline:
+            return False
+        game.status = GameStatus.ABORTED
+        game.result = "*"
+        game.termination = "aborted"
+        game.rated = False
+        game.ended_at = now
+        game.version += 1
+        return True
     white, black = remaining(game, now)
     turn = game.current_fen.split()[1]
     if (white if turn == "w" else black) > 0:
@@ -89,7 +104,8 @@ def expire(game: Game, now: datetime) -> bool:
     return True
 
 
-async def sweep_once(database: Database) -> None:
+async def sweep_once(database: Database, notifications: GameNotifications | None = None) -> None:
+    changed = []
     async with database.sessions() as session, session.begin():
         # Bound each batch; SKIP LOCKED allows multiple workers without double results.
         games = (
@@ -99,9 +115,10 @@ async def sweep_once(database: Database) -> None:
                     Game.status == GameStatus.ACTIVE,
                     Game.turn_started_at.is_not(None),
                     text(
-                        "turn_started_at + (CASE WHEN split_part(current_fen, ' ', 2) = 'w' "
+                        "COALESCE(first_move_deadline, turn_started_at + "
+                        "(CASE WHEN split_part(current_fen, ' ', 2) = 'w' "
                         "THEN white_remaining_ms ELSE black_remaining_ms END) "
-                        "* interval '1 millisecond' "
+                        "* interval '1 millisecond') "
                         "<= clock_timestamp()"
                     ),
                 )
@@ -111,13 +128,18 @@ async def sweep_once(database: Database) -> None:
         ).all()
         now = await database_now(session)
         for game in games:
-            expire(game, now)
+            if expire(game, now):
+                await notify_transaction(session, game.id)
+                changed.append(game.id)
+    if notifications is not None:
+        for game_id in changed:
+            notifications.notify(game_id)
 
 
-async def clock_worker(database: Database) -> None:
+async def clock_worker(database: Database, notifications: GameNotifications | None = None) -> None:
     while True:
         try:
-            await sweep_once(database)
+            await sweep_once(database, notifications)
         except SQLAlchemyError:
             logging.getLogger(__name__).warning("Clock sweep deferred: database unavailable")
         await asyncio.sleep(0.5)

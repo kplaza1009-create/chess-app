@@ -2,12 +2,12 @@ from typing import Annotated, cast
 
 from fastapi import Depends, Header, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import RefreshSession, User
 from app.db.session import get_session
-from app.services.security import AuthError, Security, utc_now
+from app.services.security import AuthError, Claims, Security
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 bearer = HTTPBearer(auto_error=False)
@@ -43,6 +43,11 @@ async def current_user(
     if credentials is None:
         raise AuthError(401, "Authentication required")
     claims = security.decode(credentials.credentials, "access")
+    return await session_user(session, claims)
+
+
+async def session_user(session: AsyncSession, claims: Claims) -> User:
+    """Revalidate a previously authenticated socket without extending its session."""
     async with session.begin():
         user = await session.scalar(
             select(User)
@@ -53,7 +58,7 @@ async def current_user(
                 RefreshSession.id == claims.sid,
                 RefreshSession.family_id == claims.sid,
                 RefreshSession.revoked_at.is_(None),
-                RefreshSession.expires_at > utc_now(),
+                RefreshSession.expires_at > func.clock_timestamp(),
             )
         )
     if user is None:

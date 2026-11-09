@@ -12,9 +12,11 @@ import "../board.css";
 export const gameStateSchema = z.object({
   type: z.literal("state"), id: z.uuid(), version: z.number().int().nonnegative(),
   color: z.enum(["w", "b"]), result: z.enum(["*", "1-0", "0-1", "1/2-1/2"]),
+  status: z.enum(["active", "finished", "aborted"]).optional(),
+  opponent: z.string().nullable().optional(),
   position: boardSchema,
   clock: z.object({ white_ms: z.number().nonnegative(), black_ms: z.number().nonnegative(),
-    running: z.boolean(), timed: z.boolean(), initial_ms: z.number().positive(),
+    running: z.boolean(), timed: z.boolean(), first_move_ms: z.number().nonnegative().nullable().optional(), initial_ms: z.number().positive(),
     increment_ms: z.number().nonnegative() }).optional(),
   moves: z.array(z.object({ uci: z.string(), san: z.string(), request_id: z.uuid() })).max(20000),
 });
@@ -140,13 +142,14 @@ export function GamePage() {
         <option value="10+0">Rapid · 10 minutes</option>
         <option value="15+10">Rapid · 15 minutes + 10 seconds per move</option>
       </select>
-      <p>White’s clock starts when you create the game. Have your opponent ready.</p>
+      <p>Each player has 30 seconds for their first move. Clocks start after both players move. A missed first move aborts the game without a result.</p>
       <p>You play White. Share the resulting page link with this registered player.</p>
       <button className="button-primary" disabled={busy}>Create game</button>
     </form> : <>
-      <div className="board-toolbar"><div role="status"><h2 className="turn-status">{state ? state.result === "*" ? `${turn} to move` : `${result} — ${state.position.ending?.replaceAll("_", " ")}` : "Loading game…"}</h2></div><span role="status">{connection}</span></div>
+      <div className="board-toolbar"><div role="status"><h2 className="turn-status">{state?.status === "aborted" ? "Game aborted — first move missed" : state ? state.result === "*" ? `${turn} to move` : `${result} — ${state.position.ending?.replaceAll("_", " ")}` : "Loading game…"}</h2></div><span role="status">{connection}</span></div>
+      {state?.clock?.first_move_ms != null && <p className="board-hint">{turn}: make your first move before the game aborts. <GameClock label="First move deadline" color={turn === "White" ? "White" : "Black"} milliseconds={state.clock.first_move_ms} running receivedAt={state.receivedAt} /></p>}
       <div className="practice-layout"><div className="board-column">
-        <div className="player-strip"><span>Opponent</span>{clock(state?.color === "b" ? "w" : "b")}</div>
+        <div className="player-strip"><span>{state?.opponent ?? "Opponent"}</span>{clock(state?.color === "b" ? "w" : "b")}</div>
         {state && <Chessboard state={state.position} flipped={state.color === "b"}
           busy={busy || connection !== "Connected" || state.position.turn !== state.color || state.result !== "*"}
           lastMove={state.moves.at(-1)?.uci ?? null} onMove={uci => {

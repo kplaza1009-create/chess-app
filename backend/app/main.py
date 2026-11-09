@@ -21,6 +21,7 @@ from app.config import Settings, get_settings
 from app.db.session import Database, get_session
 from app.middleware import SecurityHeadersMiddleware
 from app.services.clocks import clock_worker
+from app.services.notifications import GameNotifications
 from app.services.security import AuthError, Security
 
 logger = logging.getLogger(__name__)
@@ -39,13 +40,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         application.state.database = database
         application.state.game_connections = {}
         clocks: asyncio.Task[None] | None = None
+        listener: asyncio.Task[None] | None = None
+        notifications = GameNotifications()
+        application.state.game_notifications = notifications
         try:
             security = Security(settings)
             await security.initialize()
             application.state.security = security
-            clocks = asyncio.create_task(clock_worker(database))
+            listener = asyncio.create_task(
+                notifications.listen(settings.database_url.get_secret_value())
+            )
+            clocks = asyncio.create_task(clock_worker(database, notifications))
             yield
         finally:
+            if listener is not None:
+                listener.cancel()
+                with suppress(asyncio.CancelledError):
+                    await listener
             if clocks is not None:
                 clocks.cancel()
                 with suppress(asyncio.CancelledError):

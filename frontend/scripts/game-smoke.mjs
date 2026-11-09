@@ -36,10 +36,13 @@ try {
   await pages[0].getByRole("timer", { name: "White time remaining" }).waitFor();
   await pages[0].getByRole("timer", { name: "Black time remaining" }).waitFor();
   await pages[1].goto(pages[0].url()); await connected(pages[1]);
+  await pages[0].getByText(names[1], { exact: true }).waitFor();
+  await pages[0].getByRole("timer", { name: "First move deadline" }).waitFor();
   await move(pages[0], "e2", "e4");
   await pages[1].getByRole("heading", { name: "Black to move" }).waitFor();
   await move(pages[1], "e7", "e5");
   await pages[0].getByRole("heading", { name: "White to move" }).waitFor();
+  await pages[0].getByRole("timer", { name: "First move deadline" }).waitFor({ state: "hidden" });
   await pages[0].reload(); await connected(pages[0]);
   assert.equal(await pages[0].getByRole("list", { name: "Move history" }).locator("li").count(), 2);
   await contexts[0].setOffline(true);
