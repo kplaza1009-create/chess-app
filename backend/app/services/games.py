@@ -14,6 +14,7 @@ from app.chess import Position
 from app.chess.notation import san
 from app.db.models import Game, GameStatus, Move, User
 from app.services.clocks import database_now, expire, remaining
+from app.services.engine_cache import EngineCache
 from app.services.notifications import notify_transaction
 
 TERMINATIONS = {
@@ -89,7 +90,14 @@ async def snapshot(session: AsyncSession, game: Game, user_id: UUID) -> dict[str
 
 
 async def play(
-    session: AsyncSession, game: Game, user_id: UUID, version: int, request_id: UUID, uci: str
+    session: AsyncSession,
+    game: Game,
+    user_id: UUID,
+    version: int,
+    request_id: UUID,
+    uci: str,
+    *,
+    cache: EngineCache | None = None,
 ) -> None:
     moves = list(
         (
@@ -118,11 +126,14 @@ async def play(
         return
 
     def advance() -> tuple[EngineGame, str]:
-        # ponytail: replay is O(ply); profile long games before adding a bounded
-        # cache. Database moves remain the durable source of repetition history.
-        engine = EngineGame(Position.from_fen(game.initial_fen))
-        for previous in moves:
-            engine.push(previous.uci)
+        if cache is not None:
+            engine = cache.restore(
+                game.id, game.version, game.initial_fen, tuple(move.uci for move in moves)
+            )
+        else:
+            engine = EngineGame(Position.from_fen(game.initial_fen))
+            for previous in moves:
+                engine.push(previous.uci)
         notation = san(engine.position, uci)
         engine.push(uci)
         if engine.outcome() is None and (claims := engine.claimable_draws()):

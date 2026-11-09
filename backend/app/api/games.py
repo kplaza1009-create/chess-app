@@ -203,7 +203,13 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
                     async with session.begin():
                         game = await locked_game(session, game_id, user.id, write=True)
                         await play(
-                            session, game, user.id, message.version, message.request_id, message.uci
+                            session,
+                            game,
+                            user.id,
+                            message.version,
+                            message.request_id,
+                            message.uci,
+                            cache=database.game_engines,
                         )
                     notifications.notify(game_id)
                     sent_version = -1

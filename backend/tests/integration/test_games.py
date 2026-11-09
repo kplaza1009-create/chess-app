@@ -5,6 +5,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.websockets import WebSocketDisconnect
 
 from app.services.games import TERMINATIONS
@@ -210,3 +211,35 @@ def test_fifty_move_draw_after_accepted_move(auth_client: TestClient) -> None:
         state = ws.receive_json()
         assert state["result"] == "1/2-1/2"
         assert state["position"]["ending"] == "fifty_move"
+
+
+def test_failed_commit_does_not_poison_engine_cache(
+    auth_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.services import games
+
+    game_id, white, _ = room(auth_client)
+    url = f"/api/v1/games/{game_id}/ws"
+
+    async def fail_notification(*args: object) -> None:
+        # play() has already advanced the engine and flushed the move row here.
+        raise SQLAlchemyError("Simulated failure before commit")
+
+    with monkeypatch.context() as scoped:
+        scoped.setattr(games, "notify_transaction", fail_notification)
+        with auth_client.websocket_connect(url, headers={"Origin": ORIGIN}) as ws:
+            ws.send_json({"type": "auth", "token": white})
+            assert ws.receive_json()["version"] == 0
+            ws.send_json({"type": "move", "version": 0, "request_id": str(uuid4()), "uci": "e2e4"})
+            with pytest.raises(WebSocketDisconnect) as closed:
+                ws.receive_json()
+            assert closed.value.code == 1013
+    with auth_client.websocket_connect(url, headers={"Origin": ORIGIN}) as ws:
+        ws.send_json({"type": "auth", "token": white})
+        state = ws.receive_json()
+        assert state["version"] == 0
+        assert state["moves"] == []
+        ws.send_json({"type": "move", "version": 0, "request_id": str(uuid4()), "uci": "d2d4"})
+        state = ws.receive_json()
+        assert state["version"] == 1
+        assert [move["uci"] for move in state["moves"]] == ["d2d4"]

@@ -402,6 +402,15 @@ class Game:
     def position(self) -> Position:
         return self._positions[-1]
 
+    def copy(self) -> Game:
+        """Copy mutable history; immutable positions and moves can be shared."""
+        clone = object.__new__(Game)
+        clone._positions = self._positions.copy()
+        clone._moves = self._moves.copy()
+        clone._counts = self._counts.copy()
+        clone._claimed = self._claimed
+        return clone
+
     @property
     def moves(self) -> tuple[Move, ...]:
         return tuple(self._moves)

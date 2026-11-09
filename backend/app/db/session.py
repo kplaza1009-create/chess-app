@@ -5,10 +5,12 @@ from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import Settings
+from app.services.engine_cache import EngineCache
 
 
 class Database:
     def __init__(self, settings: Settings) -> None:
+        self.game_engines = EngineCache()
         self.engine = create_async_engine(
             settings.database_url.get_secret_value(),
             pool_pre_ping=True,

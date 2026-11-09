@@ -41,7 +41,7 @@ that the current snapshot is ready for production deployment.
 | 4 | Full engine pytest suite, including perft tests | Complete; included |
 | 5 | Chessboard UI, drag-and-drop, legal move highlights | Implemented; browser QA limits in PHASE5.md |
 | 6 | WebSocket game server, state synchronization, reconnect | Implemented; browser acceptance pending |
-| 7 | Time controls and server-side clocks | Next |
+| 7 | Time controls and server-side clocks | Implemented; review fixes in REVIEW_FIXES.md |
 | 8 | Matchmaking queue and ELO system | Pending |
 | 9 | Game history, replay viewer, PGN import/export | Pending |
 | 10 | Minimax AI with alpha-beta pruning | Pending |

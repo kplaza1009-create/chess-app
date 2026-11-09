@@ -100,6 +100,9 @@ only game IDs; authorized readers load the committed state. Events coalesce,
 so slow clients cannot create an unbounded broadcast queue. A five-second poll
 is a recovery fallback, with shared snapshot locks rather than exclusive locks.
 All game endings use database time. Snapshots also refresh every 15 seconds.
+Move validation uses a bounded per-worker engine-history cache, verified against
+the database version and move history before reuse. It copies the committed
+state before applying a proposed move, so transaction rollback stays safe.
 The browser estimates
 elapsed time with performance.now(), not the user's adjustable wall clock.
 Network latency can make the displayed estimate optimistic; only the server
