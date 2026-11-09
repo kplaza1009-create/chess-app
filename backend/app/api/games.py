@@ -8,6 +8,7 @@ from datetime import timedelta
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
+from anyio import CancelScope
 from fastapi import APIRouter, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -26,6 +27,17 @@ from app.services.security import AuthError, Security
 
 router = APIRouter(prefix="/api/v1/games", tags=["games"])
 logger = logging.getLogger(__name__)
+
+
+async def _cancel_tasks(*tasks: asyncio.Task[Any]) -> None:
+    # TestClient (and other AnyIO callers) can cancel us while gather is draining
+    # a mixture of pending and already-cancelled children. Shield that drain so
+    # gather cannot replace the caller's cancellation with a child's bare one.
+    # Cancellation of the handler itself still propagates outside this scope.
+    with CancelScope(shield=True):
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 
 class CreateGame(BaseModel):
@@ -155,6 +167,8 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
             await ws.close(code=1013)
             return
         slots[key] -= 1
+        if slots[key] == 0:
+            del slots[key]
         key = user_key
         slots[key] = slots.get(key, 0) + 1
         sent_version = -1
@@ -183,8 +197,7 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
             done, _ = await asyncio.wait(
                 {receive_task, wake_task}, timeout=5, return_when=asyncio.FIRST_COMPLETED
             )
-            wake_task.cancel()
-            await asyncio.gather(wake_task, return_exceptions=True)
+            await _cancel_tasks(wake_task)
             wake_task = None
             if receive_task not in done:
                 continue
@@ -236,11 +249,10 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
     finally:
         if changed is not None:
             notifications.unsubscribe(game_id, changed)
-        tasks = [task for task in (receive_task, wake_task) if task is not None]
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
+        # Release synchronous accounting even if the server cancels this handler
+        # again during asynchronous teardown.
         if key is not None:
             slots[key] -= 1
             if slots[key] == 0:
                 del slots[key]
+        await _cancel_tasks(*(task for task in (receive_task, wake_task) if task is not None))

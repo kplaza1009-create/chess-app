@@ -1,11 +1,13 @@
-# Codex handoff — Phase 7 implemented, browser acceptance pending
+# Codex handoff — Phase 7 implemented, teardown review follow-up
 
 Read PHASE7.md first. Persistent clocks use database timestamps, row locks,
 increments, a background expiration worker and two browser clock displays.
 Read REVIEW_FIXES.md for migration 0003, push delivery, first-move aborts,
 socket authentication, and the bounded engine cache brought forward to resolve
-the strict <100 ms local delivery check. Browser acceptance of this patch is
-still required on the target environment.
+the strict <100 ms local delivery check. The independent reviewer subsequently
+verified both browser smokes, opening-move aborts, repeated token expiries and
+real-server connection cleanup. Read TEARDOWN_FIX.md for the later cancellation
+race in TestClient teardown and its focused regressions and acceptance results.
 New games are timed; existing games with null turn_started_at stay untimed.
 The timeout material policy is not a complete dead-position solver; see limits.
 Phase 8 requires the user's next-phase instruction. The notes below are history.

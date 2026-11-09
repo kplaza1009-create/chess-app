@@ -1,5 +1,12 @@
 # Phase 6–7 independent-review patch
 
+The later TestClient teardown fix is documented in TEARDOWN_FIX.md. It corrects
+the cancellation race without relaxing assertions or changing dependency versions.
+Five consecutive full runs on PostgreSQL 16 / America/New_York each passed all
+451 tests with no skips. TEARDOWN_FIX.md also records the separate network checks,
+including a same-worker latency measurement that exceeded 100 ms on this host.
+The results below describe the preceding latency-cache patch.
+
 Implemented immediate local game wakeups and transactional PostgreSQL LISTEN/NOTIFY
 across workers. A five-second safety poll remains for missed notifications and
 session revocation; it no longer takes exclusive game locks. All snapshot sends

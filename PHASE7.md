@@ -135,6 +135,10 @@ or scheduler after profiling larger workloads. Matchmaking and ELO are Phase 8.
 
 ## Verification record
 
+Latest follow-up: see TEARDOWN_FIX.md for the TestClient cancellation fix, five
+consecutive 451-test passes on PostgreSQL 16 / America/New_York (including deep
+perft, no skips), and the separate network-smoke and latency measurements.
+
 Baseline before review: 421 passed, 9 deeper perft tests skipped. This includes the added
 timeout/move race, increment idempotence, persistence and disconnected expiry.
 Actual HTTP and WebSocket smoke passed: two users, synchronized moves, SAN

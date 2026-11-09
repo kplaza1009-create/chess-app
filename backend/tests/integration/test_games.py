@@ -153,6 +153,25 @@ def test_two_connections_race_same_move(auth_client: TestClient) -> None:
 
     with ThreadPoolExecutor(2) as pool:
         assert list(pool.map(lambda _: send(), range(2))) == [1, 1]
+    assert auth_client.app.state.game_connections == {}
+    assert auth_client.app.state.game_notifications.subscribers == {}
+
+
+@pytest.mark.parametrize("send_move", [False, True])
+def test_socket_teardown_releases_slots_and_subscriptions(
+    auth_client: TestClient, send_move: bool
+) -> None:
+    game_id, white, _ = room(auth_client)
+    with auth_client.websocket_connect(
+        f"/api/v1/games/{game_id}/ws", headers={"Origin": ORIGIN}
+    ) as ws:
+        ws.send_json({"type": "auth", "token": white})
+        assert ws.receive_json()["version"] == 0
+        if send_move:
+            ws.send_json({"type": "move", "version": 0, "request_id": str(uuid4()), "uci": "e2e4"})
+            # Exit immediately, without waiting for a move acknowledgement.
+    assert auth_client.app.state.game_connections == {}
+    assert auth_client.app.state.game_notifications.subscribers == {}
 
 
 @pytest.mark.parametrize("binary", [False, True])

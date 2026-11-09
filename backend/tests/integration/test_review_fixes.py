@@ -85,6 +85,8 @@ def test_missing_first_move_aborts_unrated(auth_client: TestClient, white_moved:
                 )
         finally:
             engine.dispose()
+    assert auth_client.app.state.game_connections == {}
+    assert auth_client.app.state.game_notifications.subscribers == {}
 
 
 def test_socket_survives_token_expiry_but_new_handshake_fails(auth_client: TestClient) -> None:
