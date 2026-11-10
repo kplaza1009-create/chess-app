@@ -139,6 +139,10 @@ chess-app/
 
 This is a development-stage portfolio project. The game-history/PGN UI, computer opponent, spectator/chat features, full public deployment, and some production hardening are future work. Matchmaking currently prioritizes correctness over high-throughput queue scaling. For the exact state of Phase 8 and its known follow-ups, read [`PHASE8.md`](PHASE8.md) and [`PROJECT_PLAN.md`](PROJECT_PLAN.md).
 
+## How it was built
+
+Built with AI coding assistants. I designed the phase plan, set the requirements, and independently reviewed and tested each phase before moving on.
+
 ## Project documentation
 
 - [`PROJECT_PLAN.md`](PROJECT_PLAN.md) — goals, milestones, and remaining phases
