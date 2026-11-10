@@ -53,6 +53,7 @@ afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(
 function renderGame(): void {
   render(<MemoryRouter initialEntries={[`/games/${gameId}`]}><Routes>
     <Route path="games/:id" element={<GamePage />} />
+    <Route path="play" element={<h1>Rated play</h1>} />
   </Routes></MemoryRouter>);
 }
 
@@ -67,6 +68,8 @@ it("authenticates, renders state and sends a versioned move", async () => {
     type: "state", id: gameId, version: 0, color: "w", result: "*", position, moves: [],
   }) } as MessageEvent));
   expect(await screen.findByRole("heading", { name: "White to move" })).toBeVisible();
+  expect(screen.getByText("Select a piece to see its legal moves.")).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Find another game" })).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "e2, White pawn" }));
   await userEvent.click(screen.getByRole("button", { name: "e4, empty, legal destination" }));
   expect(JSON.parse(ws.sent[1] ?? "null")).toEqual({
@@ -97,6 +100,8 @@ it("names the opponent and renders an abort without calling it a draw", async ()
   }) } as MessageEvent));
   expect(await screen.findByRole("heading", { name: "Game aborted — first move missed" })).toBeVisible();
   expect(screen.getByText("blackplayer")).toBeVisible();
+  expect(screen.queryByText("Select a piece to see its legal moves.")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Find another game" })).not.toBeInTheDocument();
 });
 
 it("shows reconnecting immediately when the browser goes offline", async () => {
@@ -106,14 +111,20 @@ it("shows reconnecting immediately when the browser goes offline", async () => {
   expect(await screen.findByText("Reconnecting…", { exact: true })).toBeVisible();
 });
 
-it("shows the server-confirmed rating change after a rated game", async () => {
+it("shows both settled ratings and a way back to matchmaking after a rated game", async () => {
   renderGame();
   await waitFor(() => expect(sockets).toHaveLength(1));
   act(() => sockets[0]?.onmessage?.({ data: JSON.stringify({
     type: "state", id: gameId, version: 4, color: "w", result: "0-1",
     status: "finished", rated: true, rating_change: { before: 1200, after: 1184 },
+    player_rating: 1184, opponent_rating: 1216,
     position: { ...position, ending: "checkmate", legal_moves: [] }, moves: [],
   }) } as MessageEvent));
   expect(screen.getByText(/Rated ·/)).toBeVisible();
   expect(screen.getByText("Your rating: 1200 → 1184 (-16)")).toBeVisible();
+  expect(screen.getByText("1184")).toBeVisible();
+  expect(screen.getByText("1216")).toBeVisible();
+  expect(screen.queryByText("Select a piece to see its legal moves.")).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("link", { name: "Find another game" }));
+  expect(screen.getByRole("heading", { name: "Rated play" })).toBeVisible();
 });

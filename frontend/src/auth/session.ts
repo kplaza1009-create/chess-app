@@ -101,6 +101,19 @@ export class AuthSession {
     if (this.state.user?.id === user.id) this.update({ status: "authenticated", user, error: null });
   }
 
+  deleteOnExit(path: string, userId: string): void {
+    const token = this.accessToken;
+    if (!token || this.state.user?.id !== userId) return;
+    // Dispatch before pagehide returns. Refreshing or waiting for a response
+    // would depend on the page staying alive.
+    void fetch(`/api/v1${path}`, {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: { Authorization: `Bearer ${token}` },
+      keepalive: true,
+    }).catch(() => { /* The search lease expires if the request is lost. */ });
+  }
+
   async authorized<T>(path: string, schema: z.ZodType<T>, options: RequestInit = {}): Promise<T> {
     const revision = this.revision;
     const send = (token: string): Promise<T> => {

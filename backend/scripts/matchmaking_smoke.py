@@ -45,6 +45,7 @@ def main() -> None:
     waiting = api(BASE, path, a_token, "POST", control)
     assert waiting["state"] == "queued"
     assert api(BASE, f"{path}/{waiting['ticket_id']}", a_token, "DELETE") == {"state": "idle"}
+    assert api(PEER, path, a_token) == {"state": "idle"}
     waiting = api(BASE, path, a_token, "POST", control)
     match = api(PEER, path, b_token, "POST", control)
     assert match["state"] == "matched"
@@ -59,6 +60,8 @@ def main() -> None:
         first, second = state(a), state(b)
         assert first["rated"] and second["rated"]
         assert first["color"] != second["color"]
+        assert (first["player_rating"], first["opponent_rating"]) == (1200, 1200)
+        assert (second["player_rating"], second["opponent_rating"]) == (1200, 1200)
         white, black = (a, b) if first["color"] == "w" else (b, a)
         for version, uci in enumerate(["f2f3", "e7e5", "g2g4", "d8h4"]):
             message = {"type": "move", "version": version, "request_id": str(uuid4()), "uci": uci}
@@ -68,6 +71,8 @@ def main() -> None:
         assert w_state["result"] == b_state["result"] == "0-1"
         assert w_state["rating_change"] == {"before": 1200, "after": 1184}
         assert b_state["rating_change"] == {"before": 1200, "after": 1216}
+        assert (w_state["player_rating"], w_state["opponent_rating"]) == (1184, 1216)
+        assert (b_state["player_rating"], b_state["opponent_rating"]) == (1216, 1184)
         black.send(json.dumps(message))
         assert state(black)["rating_change"] == b_state["rating_change"]
     assert api(BASE, path, a_token) == api(PEER, path, b_token) == {"state": "idle"}

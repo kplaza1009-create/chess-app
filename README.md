@@ -1,68 +1,151 @@
 # Chess Room
 
-A real-time multiplayer chess web app with its own chess engine, written from scratch.
+**A full-stack, real-time multiplayer chess application built with React, TypeScript, Python, FastAPI, and PostgreSQL.**
 
-**Status:** in active development. Phases 1–8 of a 16-phase plan are complete
-(see [PROJECT_PLAN.md](PROJECT_PLAN.md)). It runs locally with Docker; public deployment comes later.
+Chess Room is an in-development web app for playing chess with other people. It includes a **custom chess engine written in Python (without `python-chess`)**, interactive boards, authenticated accounts, persistent online games, server-controlled clocks, and rating-based matchmaking.
 
-## What works today
+> **Project status:** Active development — **Phase 8 completed**. The repository is a working development build, not yet a publicly deployed production service.
 
-- **Accounts:** register, log in, log out. JWT access tokens, rotating refresh tokens with
-  reuse detection, CSRF protection, and rate limiting.
-- **Chess engine in pure Python** (no chess libraries): castling, en passant, promotion, check,
-  checkmate, stalemate, threefold repetition, the 50-move rule, and insufficient material.
-  Move generation is verified against published
-  [perft](https://www.chessprogramming.org/Perft_Results) counts for six reference positions.
-- **Interactive board:** click, drag, touch, and keyboard input, legal-move highlights,
-  promotion dialog, light and dark themes, and a practice mode.
-- **Online games over WebSockets:** two-player rooms, reconnect handling, and moves pushed to the
-  opponent immediately using PostgreSQL `LISTEN/NOTIFY`.
-- **Server-side clocks:** 1+0, 3+2, 5+0, 10+0, and 15+10. The server is the only timekeeper,
-  timeouts are decided on the server, and a first-move rule aborts games nobody shows up for.
-- **Rated matchmaking and Elo:** a queue that pairs players on the same time control within a
-  rating window that widens the longer they wait, with separate bullet, blitz, and rapid
-  ratings settled in the same database transaction that records the result.
+## Features
 
-## Still to come
+### Implemented
 
-Game history and PGN import/export, a minimax AI opponent with
-alpha-beta pruning, spectators and chat, leaderboards, a security review, and deployment.
+- **Custom chess engine:** Legal move generation, check and checkmate, castling, en passant, pawn promotion, stalemate, repetition, move-count draws, and insufficient-material detection.
+- **Interactive board:** Select or drag pieces, see legal destinations, choose promotions, and practice locally at `/practice`.
+- **Accounts and sessions:** Registration, login, logout, session restoration, password hashing, and access/refresh token handling.
+- **Online multiplayer:** Two-player private rooms, WebSocket-based position updates, persistent moves, and reconnect handling.
+- **Timed games:** Bullet, blitz, and rapid formats with authoritative server clocks, increments where applicable, and timeout adjudication.
+- **Rated matchmaking:** A PostgreSQL-backed queue that pairs players on the same time control using a widening rating window; queue cancellation on navigation and page exit.
+- **Elo ratings:** Separate bullet, blitz, and rapid ratings with transactional updates after eligible rated games.
+- **Testing and validation:** Engine/perft tests, backend integration tests, frontend component tests, static checks, and network smoke-test scripts.
 
-## Tech stack
+### Planned
+
+- Game history viewer and move replay, with PGN import/export
+- Computer opponent using minimax and alpha-beta pruning
+- Spectator mode, chat, draw offers, resignation, and rematches
+- Leaderboards and expanded user profiles
+- Further security/performance work and public deployment
+
+Planned features are **not** represented as completed functionality.
+
+## Technology stack
 
 | Layer | Tools |
-|---|---|
-| Frontend | React, TypeScript (strict), Vite, Tailwind CSS |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, React Router |
 | Backend | Python 3.12, FastAPI, WebSockets |
 | Database | PostgreSQL, SQLAlchemy 2.0, Alembic |
-| Testing | pytest, Vitest, React Testing Library, Playwright |
-| Tooling | Docker Compose, Ruff, mypy (strict) |
+| Authentication | JWT access/refresh tokens, bcrypt |
+| Chess logic | Custom Python engine; no third-party chess-rules library |
+| Testing | pytest, Vitest, React Testing Library, perft, Ruff, mypy |
+| Development environment | Docker, Docker Compose |
 
-## Run it locally
+## How it works
 
-You need Docker Desktop running.
+1. A player registers or signs in through the React frontend.
+2. The player can practice locally, create an unrated private game, or join the rated matchmaking queue.
+3. Matchmaking uses PostgreSQL transactions to pair eligible players. Each online match is represented by a persisted game record.
+4. The FastAPI server validates moves using the custom chess engine and synchronizes game state over authenticated WebSockets.
+5. For rated games, the backend settles results and Elo changes together in a database transaction, with separate rating pools for different speeds.
+
+**Engineering highlights:** The authoritative game state lives on the server; moves are versioned and persisted; players can reconnect; clocks use persisted server timestamps; and rating settlement is designed to avoid duplicate updates.
+
+## Run locally
+
+### Requirements
+
+- Docker Desktop (or Docker Engine with Docker Compose)
+- Python 3, for the included local configuration helper
+
+From the **`chess-app` project root** (the folder containing `compose.yaml`):
 
 ```bash
+# 1. Generate a local .env file and signing secret.
 python3 scripts/configure_env.py
+
+# 2. Build and start the database, migrations, API, and frontend.
 docker compose up --build -d
+
+# 3. Check that the services started.
+docker compose ps
 ```
 
-Open http://localhost:5173. To play a game against yourself, create two accounts in two
-different browsers (for example Safari and Chrome), then use **Online rooms**.
+Open:
 
-## Run the tests
+- **Frontend:** http://localhost:5173
+- **Play / matchmaking:** http://localhost:5173/play
+- **Local practice:** http://localhost:5173/practice
+- **API documentation (development only):** http://localhost:8000/docs
+
+To try multiplayer, open the site in **two separate browser profiles** and sign in with different accounts. Choose the same time control and select **Find opponent** on each account. Alternatively, create a private room and invite another registered user.
+
+Stop the application with:
 
 ```bash
-docker compose --profile test run --build --rm test
-docker compose --profile test run --build --rm frontend_test
+docker compose down
 ```
 
-The backend suite has 476 tests (467 routine, plus 9 deeper perft trees enabled with
-`--runslow`). The frontend suite has 55. Browser smoke tests live in `frontend/scripts`.
+**Existing installations:** Preserve your original `.env` and PostgreSQL volume when updating. Do not run `docker compose down -v` unless you intentionally want to delete local database data. Never commit your actual `.env` file or production credentials.
 
-## How it was built
+## Tests and quality checks
 
-This project is built phase by phase with AI coding assistants, directed and reviewed by me.
-Each phase is independently tested and reviewed before the next one starts; the `PHASE*.md`
-files and [REVIEW_FIXES.md](REVIEW_FIXES.md) record what was built, what was verified, and what
-each review found.
+Run these from the project root while Docker is available:
+
+```bash
+# Backend unit, engine, and integration tests against a separate test database.
+docker compose --profile test run --build --rm test
+
+# Frontend production build and test suite.
+docker compose --profile test run --build --rm frontend_test
+
+# Verify database migrations after the development stack is running.
+docker compose exec api alembic check
+```
+
+**Latest documented Phase 8 review results (not rerun for this README):**
+
+- 467 backend tests passed; nine optional deep-perft cases skipped
+- 59 frontend tests passed
+- Production frontend build, Ruff, mypy, and Alembic checks passed
+- Two-process multiplayer smoke tests covered matchmaking cancellation, rated play, and rating settlement
+
+See [`PHASE8.md`](PHASE8.md) for the verification notes, reproduction steps, caveats, and follow-up fixes.
+
+## Repository layout
+
+```text
+chess-app/
+├── backend/
+│   ├── app/
+│   │   ├── api/           # Authentication, boards, games, matchmaking
+│   │   ├── chess/         # Custom chess engine and notation
+│   │   ├── db/            # Models and database access
+│   │   └── services/      # Clocks, ratings, matchmaking, security
+│   ├── alembic/           # Database schema migrations
+│   ├── engine_tests/      # Chess rules and perft tests
+│   └── tests/             # API and integration tests
+├── frontend/
+│   ├── src/components/    # Board, pieces, clocks, layouts
+│   ├── src/pages/         # Practice, matchmaking, game, auth
+│   └── src/test/          # UI and client tests
+├── scripts/               # Local environment setup
+├── compose.yaml           # Development/test service definitions
+├── .env.example           # Example configuration (safe to commit)
+└── PROJECT_PLAN.md        # Full project roadmap
+```
+
+## Current limitations
+
+This is a development-stage portfolio project. The game-history/PGN UI, computer opponent, spectator/chat features, full public deployment, and some production hardening are future work. Matchmaking currently prioritizes correctness over high-throughput queue scaling. For the exact state of Phase 8 and its known follow-ups, read [`PHASE8.md`](PHASE8.md) and [`PROJECT_PLAN.md`](PROJECT_PLAN.md).
+
+## Project documentation
+
+- [`PROJECT_PLAN.md`](PROJECT_PLAN.md) — goals, milestones, and remaining phases
+- [`PHASE8.md`](PHASE8.md) — current matchmaking/rating implementation and verification
+- [`PHASE7.md`](PHASE7.md) — persistent clocks and opening deadlines
+- [`AUTH_TIMEZONE_FIX.md`](AUTH_TIMEZONE_FIX.md) — UTC refresh-cookie fix and regressions
+
+---
+
+**Created by Kevin Plaza** · Computer Science student · Work in progress

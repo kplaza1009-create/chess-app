@@ -49,6 +49,7 @@ it("loads the current rating when entering the account page", async () => {
   await user.type(screen.getByLabelText("Password"), "a safe passphrase");
   await user.click(screen.getByRole("button", { name: "Sign in" }));
   expect(await screen.findByText("1216")).toBeVisible();
+  expect(screen.getByText("1 rated game")).toBeVisible();
 });
 
 it("shows invalid credentials and keeps the user on the login page", async () => {

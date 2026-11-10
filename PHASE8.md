@@ -25,8 +25,10 @@ time control and click **Find opponent** on each side.
 The board shows your assigned color. Make both first moves before the opening
 deadlines. For a quick checkmate test, the moves are `f2f3 e7e5 g2g4 d8h4`.
 With two new accounts, Black gains 16 points and White loses 16. Both players
-see their own change on the game page. Opening the account page loads the
-current ratings from the server.
+see their own change on the game page and can choose **Find another game**.
+The lobby shows your rating for the selected time control. Both player strips
+use the game's rating pool. After a rated result, they show the settled
+ratings from that game. Opening the account page loads current ratings.
 
 | Rated time control | Rating pool |
 | --- | --- |
@@ -41,12 +43,15 @@ opponent in the same time control. Both players start with a 100-point window
 that widens by 50 points every five seconds to a maximum of 400. The rating
 difference must fit both windows. Colors are assigned randomly.
 
-The lobby renews its search about every 2.5 seconds. The ticket expires after
-20 seconds without renewal. Reloading or restarting the API within that window
-can resume the search. If pairing already completed, the Play page reopens the
-active rated game. A revoked login makes its search ineligible. Canceling
-targets a specific ticket ID, so a delayed cancel cannot remove a newer search.
-If pairing commits first, the cancel response returns the matched game.
+The lobby renews its search about every 2.5 seconds. Navigating away or a
+browser `pagehide` sends a keepalive DELETE for the ticket and stops renewals.
+If a join returns a ticket after SPA navigation, the lobby cancels that ticket
+as well. The 20-second lease covers a lost request or a browser shutdown before
+the ticket arrives. An API restart within the lease can resume the search.
+The Play page checks the server again on return and reopens any active rated
+game. A revoked login makes its search ineligible. Canceling targets a specific
+ticket ID, so a delayed cancel cannot remove a newer search. If pairing commits
+first, the cancel response returns the matched game.
 
 PostgreSQL serializes the short queue transactions across API processes.
 Creating the game and consuming both tickets commit together. The existing
@@ -107,6 +112,36 @@ Docker Compose was unavailable in the authoring environment. The backend
 checks used PostgreSQL and Uvicorn directly. Chromium launch was blocked by
 the workspace socket policy. Frontend behavior was checked with Vitest, and
 the two-browser procedure above is available for local verification.
+
+## Independent review patch
+
+The independent reviewer confirmed rated play in two browsers, six games from
+12 simultaneous joins, and agreement with the Elo formula in 18,204 cases.
+The review found that navigating away from the lobby left its ticket eligible
+until the lease expired. The patch sends an authenticated keepalive DELETE on
+exit and handles join responses that arrive after navigation.
+
+The patch passed **467 backend tests** on PostgreSQL 16.11 with
+`America/New_York` and **59 frontend tests**. The nine opt-in deep perft cases
+were skipped. Frontend regressions cover navigation, late joins, `pagehide`,
+cached returns, and the keepalive request. Rated game tests also verify that
+reopening a finished game preserves its settled ratings after later changes.
+The build, Ruff, mypy, and Alembic checks passed.
+
+The private and rated wire smokes passed. The rated smoke verified cancellation
+across two API processes and checked both players' ratings before and after
+checkmate. The 30-move delivery checks peaked at 31.3 ms on one process and
+76.5 ms across two, both within the existing 100 ms limit. Chromium could not
+launch under the workspace socket policy, so the updated browser flow was
+exercised with Vitest.
+
+To check the exit behavior in your browser, start a search with one account
+and choose **Create a private room**. Return to **Play** and confirm the lobby
+offers **Find opponent**. Repeat with a reload during a search to exercise
+`pagehide`.
+
+The follow-ups for resignation, disconnect forfeits, repeat pairings, and
+first-move abort cooldowns are recorded in PROJECT_PLAN.md.
 
 Run the ordinary test suites from the project root:
 

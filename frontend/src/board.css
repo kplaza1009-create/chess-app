@@ -15,7 +15,10 @@
 .matchmaking-panel .room-form { width: 100%; }
 .matchmaking-panel [role="status"] > p { margin-top: 8px; color: var(--muted); }
 .matchmaking-alternative { margin-top: 24px; font-size: .875rem; }
-.rating-result { margin-bottom: 12px; color: var(--accent); font-weight: 650; }
+.game-result-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; }
+.rating-result { color: var(--accent); font-weight: 650; }
+.game-player { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; min-width: 0; overflow-wrap: anywhere; }
+.player-rating { color: var(--muted); font-size: .8rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 .player-strip > .game-clock:last-child { font-size: 1.4rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; min-width: 100px; text-align: right; }
 .player-strip > .game-clock.running:last-child { color: var(--accent); }
 .clock-active { font-size: .75rem; }

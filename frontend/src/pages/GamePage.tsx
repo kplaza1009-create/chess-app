@@ -14,6 +14,8 @@ export const gameStateSchema = z.object({
   color: z.enum(["w", "b"]), result: z.enum(["*", "1-0", "0-1", "1/2-1/2"]),
   status: z.enum(["active", "finished", "aborted"]).optional(),
   opponent: z.string().nullable().optional(),
+  player_rating: z.number().int().nonnegative().nullable().optional(),
+  opponent_rating: z.number().int().nonnegative().nullable().optional(),
   rated: z.boolean().optional(),
   rating_change: z.object({
     before: z.number().int().nonnegative(), after: z.number().int().nonnegative(),
@@ -125,8 +127,10 @@ export function GamePage() {
   if (!user) return <section className="practice page-width"><h1>Online rooms</h1><Link to="/login">Sign in to play</Link></section>;
   const turn = state?.position.turn === "w" ? "White" : "Black";
   const result = state?.result === "1-0" ? "White wins" : state?.result === "0-1" ? "Black wins" : "Draw";
+  const gameOver = state != null && (state.result !== "*" || state.status === "aborted" || state.status === "finished");
   const rating = state?.rating_change;
   const delta = rating ? rating.after - rating.before : 0;
+  const findAgain = gameOver && state?.rated;
   function clock(color: "w" | "b") {
     if (!state?.clock?.timed) return null;
     return <GameClock color={color === "w" ? "White" : "Black"}
@@ -155,12 +159,20 @@ export function GamePage() {
       <button className="button-primary" disabled={busy}>Create game</button>
     </form> : <>
       <div className="board-toolbar"><div role="status"><h2 className="turn-status">{state?.status === "aborted" ? "Game aborted — first move missed" : state ? state.result === "*" ? `${turn} to move` : `${result} — ${state.position.ending?.replaceAll("_", " ")}` : "Loading game…"}</h2></div><span role="status">{connection}</span></div>
-      {rating && <p className="rating-result">Your rating: {rating.before} → {rating.after} ({delta > 0 ? "+" : ""}{delta})</p>}
+      {(rating || findAgain) && <div className="game-result-actions">
+        {rating && <p className="rating-result">Your rating: {rating.before} → {rating.after} ({delta > 0 ? "+" : ""}{delta})</p>}
+        {findAgain && <Link className="button-primary" to="/play">Find another game</Link>}
+      </div>}
       {state?.clock?.first_move_ms != null && <p className="board-hint">{turn}: make your first move before the game aborts. <GameClock label="First move deadline" color={turn === "White" ? "White" : "Black"} milliseconds={state.clock.first_move_ms} running receivedAt={state.receivedAt} /></p>}
       <div className="practice-layout"><div className="board-column">
-        <div className="player-strip"><span>{state?.opponent ?? "Opponent"}</span>{clock(state?.color === "b" ? "w" : "b")}</div>
+        <div className="player-strip">
+          <div className="game-player"><span>{state?.opponent ?? "Opponent"}</span>
+            {state?.opponent_rating != null && <span className="player-rating">{state.opponent_rating}</span>}
+          </div>
+          {clock(state?.color === "b" ? "w" : "b")}
+        </div>
         {state && <Chessboard state={state.position} flipped={state.color === "b"}
-          busy={busy || connection !== "Connected" || state.position.turn !== state.color || state.result !== "*"}
+          busy={busy || connection !== "Connected" || state.position.turn !== state.color || gameOver}
           lastMove={state.moves.at(-1)?.uci ?? null} onMove={uci => {
             if (pending.current || socket.current?.readyState !== WebSocket.OPEN) return;
             const requestId = crypto.randomUUID(); pending.current = requestId; pendingVersion.current = state.version;
@@ -169,7 +181,12 @@ export function GamePage() {
             // A missing acknowledgement triggers a fresh snapshot; never blindly replay a move.
             moveTimer.current = setTimeout(() => { if (pending.current === requestId) socket.current?.close(); }, 10000);
           }} />}
-        <div className="player-strip"><span>You · {state?.color === "b" ? "Black" : "White"}</span>{clock(state?.color ?? "w")}</div>
+        <div className="player-strip">
+          <div className="game-player"><span>You · {state?.color === "b" ? "Black" : "White"}</span>
+            {state?.player_rating != null && <span className="player-rating">{state.player_rating}</span>}
+          </div>
+          {clock(state?.color ?? "w")}
+        </div>
         {state?.clock?.timed && <p className="board-hint">Clocks keep running while disconnected. Only the server confirms a timeout.</p>}
       </div><aside className="board-sidebar"><p>{state?.rated ? "Only the matched players can open this game. Reloading restores confirmed moves." : "Share this page’s URL with your opponent. Only the two players can open this room. Reloading restores confirmed moves."}</p>
         <h2>Moves</h2>{state?.moves.length === 0 && <p>No moves yet. White starts.</p>}<ol className="game-moves" aria-label="Move history">{state?.moves.map((move, index) => <li key={move.request_id}>{index % 2 === 0 ? "White" : "Black"}: {move.san}</li>)}</ol>

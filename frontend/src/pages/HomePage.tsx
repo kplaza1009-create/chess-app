@@ -51,7 +51,7 @@ export function HomePage() {
               <Icon className="rating-icon" size={25} aria-hidden="true" />
               <h3>{label}</h3>
               <div className="rating-value"><strong>{rating?.rating ?? "Unrated"}</strong>
-                <span>{games === 0 ? "Starting rating" : `${games} rated games`}</span>
+                <span>{games === 0 ? "Starting rating" : `${games} rated game${games === 1 ? "" : "s"}`}</span>
               </div>
             </article>;
           })}

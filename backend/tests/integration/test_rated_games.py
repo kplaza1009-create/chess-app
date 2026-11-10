@@ -29,7 +29,7 @@ def ranked_room(client: TestClient, control: str = "3+2") -> tuple[str, str, str
 
 @contextmanager
 def sockets(
-    client: TestClient, room: tuple[str, str, str]
+    client: TestClient, room: tuple[str, str, str], *, ratings: tuple[int, int] = (1200, 1200)
 ) -> Iterator[tuple[WebSocketTestSession, WebSocketTestSession]]:
     game_id, first, second = room
     path = f"/api/v1/games/{game_id}/ws"
@@ -42,6 +42,8 @@ def sockets(
         a_state, b_state = a.receive_json(), b.receive_json()
         assert a_state["rated"] and b_state["rated"]
         assert a_state["color"] != b_state["color"]
+        assert (a_state["player_rating"], a_state["opponent_rating"]) == ratings
+        assert (b_state["player_rating"], b_state["opponent_rating"]) == ratings[::-1]
         yield (a, b) if a_state["color"] == "w" else (b, a)
 
 
@@ -74,6 +76,8 @@ def test_rated_checkmate_settles_once_and_exposes_result(auth_client: TestClient
         assert a["result"] == b["result"] == "0-1"
         assert a["rating_change"] == {"before": 1200, "after": 1184}
         assert b["rating_change"] == {"before": 1200, "after": 1216}
+        assert (a["player_rating"], a["opponent_rating"]) == (1184, 1216)
+        assert (b["player_rating"], b["opponent_rating"]) == (1216, 1184)
         black.send_json(final_move)
         assert black.receive_json()["rating_change"] == b["rating_change"]
 
@@ -108,12 +112,17 @@ def test_uneven_rated_draw_transfers_points_in_one_pool(auth_client: TestClient)
     )
     queue(auth_client, first, "10+0")
     game_id = queue(auth_client, second, "10+0")["game_id"]
-    with sockets(auth_client, (game_id, first, second)) as (white, black):
+    room = (game_id, first, second)
+    with sockets(auth_client, room, ratings=(1200, 1300)) as (white, black):
         a, b, _ = moves(white, black, ["g1f3", "g8f6", "f3g1", "f6g8"] * 2)
         assert a["result"] == b["result"] == "1/2-1/2"
         assert a["position"]["ending"] == b["position"]["ending"] == "repetition"
     assert rating_rows("rapid") == [(1204, 0, 0, 1), (1296, 0, 0, 1)]
     assert rating_rows() == [(1200, 0, 0, 0)] * 2
+    # Reopening a finished game shows its settled ratings after later changes.
+    execute("UPDATE user_ratings SET rating=rating+50 WHERE speed='rapid'")
+    with sockets(auth_client, room, ratings=(1204, 1296)):
+        pass
 
 
 def test_mate_and_ratings_rollback_together(

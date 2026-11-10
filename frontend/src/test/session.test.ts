@@ -26,6 +26,23 @@ describe("authentication session", () => {
     expect(session.getSnapshot()).not.toHaveProperty("access_token");
   });
 
+  it("sends an authenticated keepalive DELETE immediately for the expected account", async () => {
+    const fetchMock = mockServer();
+    const session = new AuthSession();
+    await session.login({ email: "kevin@example.com", password: "a safe passphrase" });
+    fetchMock.mockClear();
+    const path = "/matchmaking/11111111-1111-4111-8111-111111111111";
+    session.deleteOnExit(path, "other-account");
+    expect(fetchMock).not.toHaveBeenCalled();
+    session.deleteOnExit(path, authResult.user.id);
+    expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`/api/v1${path}`, {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: { Authorization: `Bearer ${authResult.access_token}` },
+      keepalive: true,
+    });
+  });
+
   it("refreshes once and retries an API request after an expired access token", async () => {
     let attempts = 0;
     const fetchMock = vi.fn<typeof fetch>(async (input) => {

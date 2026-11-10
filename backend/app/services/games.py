@@ -6,13 +6,13 @@ from uuid import UUID
 
 from anyio import to_thread
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.chess import Game as EngineGame
 from app.chess import Position
 from app.chess.notation import san
-from app.db.models import Game, GameStatus, Move, RatingChange, User
+from app.db.models import Game, GameStatus, Move, RatingChange, User, UserRating
 from app.services.clocks import database_now, expire, remaining
 from app.services.engine_cache import EngineCache
 from app.services.notifications import notify_transaction
@@ -61,12 +61,39 @@ async def snapshot(session: AsyncSession, game: Game, user_id: UUID) -> dict[str
     now = await database_now(session)
     white, black = remaining(game, now)
     opponent_id = game.black_user_id if user_id == game.white_user_id else game.white_user_id
-    opponent = await session.scalar(select(User.username).where(User.id == opponent_id))
-    rating_change = (
-        await session.get(RatingChange, (game.id, user_id))
+    player_ids = [player for player in (game.white_user_id, game.black_user_id) if player]
+    players = {
+        player_id: (username, rating)
+        for player_id, username, rating in await session.execute(
+            select(User.id, User.username, UserRating.rating)
+            .outerjoin(
+                UserRating,
+                and_(UserRating.user_id == User.id, UserRating.speed == game.speed),
+            )
+            .where(User.id.in_(player_ids))
+        )
+    }
+    rating_changes = (
+        {
+            change.user_id: change
+            for change in await session.scalars(
+                select(RatingChange).where(RatingChange.game_id == game.id)
+            )
+        }
         if game.rated and game.status == GameStatus.FINISHED
-        else None
+        else {}
     )
+
+    def rating_for(player_id: UUID | None) -> int | None:
+        if player_id is None:
+            return None
+        if change := rating_changes.get(player_id):
+            return change.rating_after
+        player = players.get(player_id)
+        return player[1] if player else None
+
+    opponent = players.get(opponent_id) if opponent_id is not None else None
+    rating_change = rating_changes.get(user_id)
     return {
         "type": "state",
         "id": str(game.id),
@@ -74,7 +101,9 @@ async def snapshot(session: AsyncSession, game: Game, user_id: UUID) -> dict[str
         "color": "w" if user_id == game.white_user_id else "b",
         "result": game.result,
         "status": game.status.value,
-        "opponent": opponent,
+        "opponent": opponent[0] if opponent else None,
+        "player_rating": rating_for(user_id),
+        "opponent_rating": rating_for(opponent_id),
         "rated": game.rated,
         "rating_change": (
             {"before": rating_change.rating_before, "after": rating_change.rating_after}

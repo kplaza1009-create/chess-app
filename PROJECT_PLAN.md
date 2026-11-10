@@ -114,3 +114,10 @@ results when the game changes. The independent reviewer measured roughly 85k
 perft leaves/sec and about 40% of runtime in Position.__post_init__. Reprofile
 on the target environment and consider a private trusted constructor for
 internal _apply transitions while preserving external input validation.
+
+## Follow-ups from the independent Phase 8 review
+
+- **Phase 11** will add resignation and a disconnect-forfeit timer for rated
+  games. A player who reconnects before the deadline can continue the game.
+- **Phase 14** will limit repeat pairings between the same two accounts and add
+  a cooldown for repeated first-move aborts.

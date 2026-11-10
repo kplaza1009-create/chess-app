@@ -105,7 +105,7 @@ export function Chessboard({ state, flipped, busy, lastMove, onMove }: Props) {
     </div>
     {drag && <span aria-hidden="true" className="drag-piece piece"
       style={{ left: drag.x, top: drag.y }}><Piece piece={drag.piece} /></span>}
-    <p className="board-selection" role="status">{selected ? `${selected} selected. ${new Set(legal.map(m => m.slice(2, 4))).size} legal destinations.` : "Select a piece to see its legal moves."}</p>
+    {state.ending === null && <p className="board-selection" role="status">{selected ? `${selected} selected. ${new Set(legal.map(m => m.slice(2, 4))).size} legal destinations.` : "Select a piece to see its legal moves."}</p>}
     <dialog ref={dialog} className="promotion-dialog" aria-labelledby="promotion-title" onCancel={() => setPromotion([])}>
       <h2 id="promotion-title">Promote your pawn</h2>
       <p>Choose the piece to complete your move.</p>
