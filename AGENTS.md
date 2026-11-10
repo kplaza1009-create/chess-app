@@ -15,7 +15,7 @@ application from a summary or substitute another technology stack.
   minimax with alpha-beta pruning than on basic React, FastAPI, or PostgreSQL.
 - Complete only the requested phase and then wait for "next phase".
   Phases 1–6 are implemented. Read PHASE6.md for protocol and verification limits.
-  Phase 7 is implemented; read PHASE7.md for acceptance limits. Phase 8 is next.
+  Phase 8 is implemented; read PHASE8.md for its behavior and verification.
 - Use Python type hints and strict TypeScript. Validate external inputs and
   handle failures without exposing credentials or sensitive inputs.
 - Never use python-chess. Implement the move generator in Python ourselves.

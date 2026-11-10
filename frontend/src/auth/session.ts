@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import { authenticate, signOut } from "../api/auth";
 import { ApiError, request } from "../api/client";
+import { userSchema } from "../types/api";
 import type { AuthResponse, LoginInput, RegisterInput, User } from "../types/api";
 
 export type AuthState =
@@ -92,6 +93,13 @@ export class AuthSession {
     // Other tabs re-read the shared cookie, including a newer login if one won the race.
     this.channel?.postMessage({ type: "changed" });
   };
+
+  async reloadUser(): Promise<void> {
+    const revision = this.revision;
+    const user = await this.authorized("/auth/me", userSchema);
+    this.ensureCurrent(revision);
+    if (this.state.user?.id === user.id) this.update({ status: "authenticated", user, error: null });
+  }
 
   async authorized<T>(path: string, schema: z.ZodType<T>, options: RequestInit = {}): Promise<T> {
     const revision = this.revision;

@@ -13,7 +13,7 @@ export function Layout() {
 
   useLayoutEffect(() => {
     const page = pathname === "/login" ? "Sign in" : pathname === "/register" ? "Create account"
-      : pathname === "/practice" ? "Practice board" : pathname.startsWith("/games") ? "Online rooms" : pathname === "/" ? user ? "Your account" : "Welcome" : "Page not found";
+      : pathname === "/practice" ? "Practice board" : pathname === "/play" ? "Rated play" : pathname.startsWith("/games") ? "Online rooms" : pathname === "/" ? user ? "Your account" : "Welcome" : "Page not found";
     document.title = `${page} | Chess Room`;
     main.current?.querySelector<HTMLElement>("h1")?.focus();
   }, [pathname, status]);
@@ -27,7 +27,7 @@ export function Layout() {
     finally { setBusy(false); }
   }
 
-  return <div className={`app-shell${pathname === "/practice" || pathname.startsWith("/games") ? " board-shell" : ""}`}>
+  return <div className={`app-shell${pathname === "/practice" || pathname === "/play" || pathname.startsWith("/games") ? " board-shell" : ""}`}>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <header className="site-header">
       <div className="page-width header-inner">
@@ -37,7 +37,7 @@ export function Layout() {
         </Link>
         <nav aria-label="Main navigation" className="main-nav">
           <Link className="nav-link" to="/practice">Practice</Link>
-          <Link className="nav-link" to="/games">Online rooms</Link>
+          <Link className="nav-link" to="/play">Play</Link>
           {status === "authenticated" && user ? <>
             <span className="nav-username">@{user.username}</span>
             <button className="button-quiet" onClick={() => { void logout(); }} disabled={busy}>

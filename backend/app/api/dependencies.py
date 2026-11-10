@@ -35,32 +35,45 @@ def require_csrf(
     security.verify_csrf(csrf or "", refresh_cookie(request, security))
 
 
-async def current_user(
-    session: SessionDep,
+def access_claims(
     security: SecurityDep,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
-) -> User:
+) -> Claims:
     if credentials is None:
         raise AuthError(401, "Authentication required")
-    claims = security.decode(credentials.credentials, "access")
+    return security.decode(credentials.credentials, "access")
+
+
+AccessDep = Annotated[Claims, Depends(access_claims)]
+
+
+async def current_user(session: SessionDep, claims: AccessDep) -> User:
     return await session_user(session, claims)
 
 
 async def session_user(session: AsyncSession, claims: Claims) -> User:
     """Revalidate a previously authenticated socket without extending its session."""
     async with session.begin():
-        user = await session.scalar(
-            select(User)
-            .join(RefreshSession, RefreshSession.user_id == User.id)
-            .where(
-                User.id == claims.sub,
-                User.is_active.is_(True),
-                RefreshSession.id == claims.sid,
-                RefreshSession.family_id == claims.sid,
-                RefreshSession.revoked_at.is_(None),
-                RefreshSession.expires_at > func.clock_timestamp(),
-            )
+        return await load_session_user(session, claims)
+
+
+async def load_session_user(session: AsyncSession, claims: Claims, *, lock: bool = False) -> User:
+    """Validate the session inside a transaction the caller already owns."""
+    statement = (
+        select(User)
+        .join(RefreshSession, RefreshSession.user_id == User.id)
+        .where(
+            User.id == claims.sub,
+            User.is_active.is_(True),
+            RefreshSession.id == claims.sid,
+            RefreshSession.family_id == claims.sid,
+            RefreshSession.revoked_at.is_(None),
+            RefreshSession.expires_at > func.clock_timestamp(),
         )
+    )
+    if lock:
+        statement = statement.with_for_update(read=True, of=(User, RefreshSession))
+    user = await session.scalar(statement)
     if user is None:
         raise AuthError(401, "Authentication required")
     return user

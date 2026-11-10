@@ -10,6 +10,12 @@
 .board-column { min-width: 0; }
 .room-form { display: grid; gap: 16px; max-width: 440px; }
 .room-form select { width: 100%; min-height: 48px; padding: 12px; border: 1px solid var(--field-line); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; }
+.matchmaking-intro { max-width: 45ch; margin-bottom: 24px; color: var(--muted); }
+.matchmaking-panel { display: grid; justify-items: start; gap: 16px; max-width: 440px; }
+.matchmaking-panel .room-form { width: 100%; }
+.matchmaking-panel [role="status"] > p { margin-top: 8px; color: var(--muted); }
+.matchmaking-alternative { margin-top: 24px; font-size: .875rem; }
+.rating-result { margin-bottom: 12px; color: var(--accent); font-weight: 650; }
 .player-strip > .game-clock:last-child { font-size: 1.4rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; min-width: 100px; text-align: right; }
 .player-strip > .game-clock.running:last-child { color: var(--accent); }
 .clock-active { font-size: .75rem; }

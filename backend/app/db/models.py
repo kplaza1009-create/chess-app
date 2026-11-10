@@ -28,6 +28,14 @@ class Speed(StrEnum):
     RAPID = "rapid"
 
 
+class TimeControl(StrEnum):
+    BULLET_1 = "1+0"
+    BLITZ_3_2 = "3+2"
+    BLITZ_5 = "5+0"
+    RAPID_10 = "10+0"
+    RAPID_15_10 = "15+10"
+
+
 class GameKind(StrEnum):
     MULTIPLAYER = "multiplayer"
     COMPUTER = "computer"
@@ -142,6 +150,16 @@ class Game(CreatedAt, Base):
         Index("ix_games_white_history", "white_user_id", text("created_at DESC"), "id"),
         Index("ix_games_black_history", "black_user_id", text("created_at DESC"), "id"),
         Index("ix_games_status", "status"),
+        Index(
+            "ix_games_active_rated_white",
+            "white_user_id",
+            postgresql_where=text("rated AND status = 'active'"),
+        ),
+        Index(
+            "ix_games_active_rated_black",
+            "black_user_id",
+            postgresql_where=text("rated AND status = 'active'"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -167,6 +185,24 @@ class Game(CreatedAt, Base):
     result: Mapped[str] = mapped_column(String(7), server_default=text("'*'"))
     termination: Mapped[str | None] = mapped_column(String(32))
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MatchmakingTicket(Base):
+    __tablename__ = "matchmaking_tickets"
+    __table_args__ = (
+        CheckConstraint("expires_at > joined_at", name="lease_after_join"),
+        Index("ix_matchmaking_tickets_pool", "time_control", "joined_at", "user_id"),
+        Index("ix_matchmaking_tickets_expires_at", "expires_at"),
+    )
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    session_id: Mapped[UUID] = mapped_column(ForeignKey("refresh_sessions.id", ondelete="CASCADE"))
+    ticket_id: Mapped[UUID] = mapped_column(default=uuid4, unique=True)
+    time_control: Mapped[TimeControl] = mapped_column(db_enum(TimeControl, "time_control"))
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class Move(CreatedAt, Base):

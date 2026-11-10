@@ -12,10 +12,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.chess import Game as EngineGame
 from app.chess import Position
 from app.chess.notation import san
-from app.db.models import Game, GameStatus, Move, User
+from app.db.models import Game, GameStatus, Move, RatingChange, User
 from app.services.clocks import database_now, expire, remaining
 from app.services.engine_cache import EngineCache
 from app.services.notifications import notify_transaction
+from app.services.ratings import settle_ratings
 
 TERMINATIONS = {
     "checkmate": "checkmate",
@@ -61,6 +62,11 @@ async def snapshot(session: AsyncSession, game: Game, user_id: UUID) -> dict[str
     white, black = remaining(game, now)
     opponent_id = game.black_user_id if user_id == game.white_user_id else game.white_user_id
     opponent = await session.scalar(select(User.username).where(User.id == opponent_id))
+    rating_change = (
+        await session.get(RatingChange, (game.id, user_id))
+        if game.rated and game.status == GameStatus.FINISHED
+        else None
+    )
     return {
         "type": "state",
         "id": str(game.id),
@@ -69,6 +75,12 @@ async def snapshot(session: AsyncSession, game: Game, user_id: UUID) -> dict[str
         "result": game.result,
         "status": game.status.value,
         "opponent": opponent,
+        "rated": game.rated,
+        "rating_change": (
+            {"before": rating_change.rating_before, "after": rating_change.rating_after}
+            if rating_change is not None
+            else None
+        ),
         "clock": {
             "white_ms": white,
             "black_ms": black,
@@ -121,6 +133,7 @@ async def play(
         raise HTTPException(409, "Game move limit reached")
     now = await database_now(session)
     if expire(game, now):
+        await settle_ratings(session, game)
         await session.flush()
         await notify_transaction(session, game.id)
         return
@@ -176,5 +189,7 @@ async def play(
             black_remaining_ms=game.black_remaining_ms,
         )
     )
+    if outcome:
+        await settle_ratings(session, game)
     await session.flush()
     await notify_transaction(session, game.id)

@@ -1,4 +1,5 @@
 import { ArrowRight, CheckCircle, Clock, Lightning, Timer } from "@phosphor-icons/react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { ChessArtwork } from "../components/ChessArtwork";
@@ -11,7 +12,10 @@ const speeds = [
 ] as const;
 
 export function HomePage() {
-  const { status, user } = useAuth();
+  const { status, user, session } = useAuth();
+  useEffect(() => {
+    if (user) void session.reloadUser().catch(() => { /* Keep the last loaded account details. */ });
+  }, [session, user?.id]);
   if (status === "loading" || status === "error") return <SessionStatus />;
   if (!user) return <section className="home-hero page-width">
     <div className="home-intro">
@@ -52,8 +56,8 @@ export function HomePage() {
             </article>;
           })}
         </div>
-        <div className="account-empty"><h3>Your first game is still ahead.</h3>
-          <p>Online play is being built. Your account and starting ratings are ready.</p>
+        <div className="account-empty"><h3>Ready to play?</h3>
+          <p><Link className="text-link" to="/play">Find a rated opponent</Link></p>
         </div>
       </section>
       <aside className="account-details" aria-labelledby="account-details-heading">

@@ -1,4 +1,9 @@
-# Codex handoff — Phase 7 implemented, teardown review follow-up
+# Codex handoff — Phase 8 implemented
+
+Read PHASE8.md for the current upgrade steps and verification. The Play page
+uses PostgreSQL-backed matchmaking for timed rated games. The game transaction
+settles Elo and records two ledger rows for rated finishes. The Phase 7 notes
+below document the clocks, push delivery, and socket cleanup that Phase 8 uses.
 
 Read PHASE7.md first. Persistent clocks use database timestamps, row locks,
 increments, a background expiration worker and two browser clock displays.
@@ -10,7 +15,7 @@ real-server connection cleanup. Read TEARDOWN_FIX.md for the later cancellation
 race in TestClient teardown and its focused regressions and acceptance results.
 New games are timed; existing games with null turn_started_at stay untimed.
 The timeout material policy is not a complete dead-position solver; see limits.
-Phase 8 requires the user's next-phase instruction. The notes below are history.
+The notes below describe earlier snapshots.
 
 Read PHASE6.md first. Phase 6 is now implemented: participant-only unrated rooms,
 WebSockets, durable versioned moves, reconnect, SAN and automatic draw claims.

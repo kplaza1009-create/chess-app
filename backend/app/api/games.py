@@ -4,22 +4,20 @@ import asyncio
 import json
 import logging
 import time
-from datetime import timedelta
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from anyio import CancelScope
 from fastapi import APIRouter, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
-from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.dependencies import SecurityDep, SessionDep, UserDep, current_user, session_user
+from app.api.dependencies import SecurityDep, SessionDep, UserDep, session_user
 from app.chess import ChessError
-from app.db.models import Game, GameKind, Speed, User
+from app.db.models import TimeControl, User
 from app.db.session import Database
-from app.services.clocks import PRESETS, database_now
+from app.services.clocks import database_now, new_timed_game
 from app.services.games import locked_game, play, snapshot
 from app.services.notifications import GameNotifications
 from app.services.rate_limit import enforce_rate_limit
@@ -43,7 +41,7 @@ async def _cancel_tasks(*tasks: asyncio.Task[Any]) -> None:
 class CreateGame(BaseModel):
     model_config = ConfigDict(extra="forbid")
     opponent: Annotated[str, Field(pattern=r"^[a-z0-9_]{3,24}$")]
-    time_control: Literal["1+0", "3+2", "5+0", "10+0", "15+10"] = "10+0"
+    time_control: TimeControl = TimeControl.RAPID_10
 
 
 class MoveMessage(BaseModel):
@@ -65,25 +63,8 @@ async def create_game(
         )
         if opponent is None or opponent.id == user.id:
             raise HTTPException(422, "Choose another registered player")
-        initial, increment = PRESETS[data.time_control]
         now = await database_now(session)
-        game = Game(
-            kind=GameKind.MULTIPLAYER,
-            white_user_id=user.id,
-            black_user_id=opponent.id,
-            rated=False,
-            speed=Speed.BULLET
-            if initial < 180000
-            else Speed.BLITZ
-            if initial < 600000
-            else Speed.RAPID,
-            initial_time_ms=initial,
-            increment_ms=increment,
-            white_remaining_ms=initial,
-            black_remaining_ms=initial,
-            turn_started_at=now,
-            first_move_deadline=now + timedelta(seconds=30),
-        )
+        game = new_timed_game(user.id, opponent.id, data.time_control, now, rated=False)
         session.add(game)
         await session.flush()
         return {"id": str(game.id)}
@@ -158,10 +139,9 @@ async def game_socket(ws: WebSocket, game_id: UUID) -> None:
             or not isinstance(auth["token"], str)
         ):
             raise ValueError("Invalid authentication frame")
-        credential = HTTPAuthorizationCredentials(scheme="Bearer", credentials=auth["token"])
         claims = security.decode(auth["token"], "access")
         async with database.sessions() as session:
-            user = await current_user(session, security, credential)
+            user = await session_user(session, claims)
         user_key = str(user.id)
         if slots.get(user_key, 0) >= 4:
             await ws.close(code=1013)

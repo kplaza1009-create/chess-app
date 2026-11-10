@@ -105,3 +105,15 @@ it("shows reconnecting immediately when the browser goes offline", async () => {
   window.dispatchEvent(new Event("offline"));
   expect(await screen.findByText("Reconnecting…", { exact: true })).toBeVisible();
 });
+
+it("shows the server-confirmed rating change after a rated game", async () => {
+  renderGame();
+  await waitFor(() => expect(sockets).toHaveLength(1));
+  act(() => sockets[0]?.onmessage?.({ data: JSON.stringify({
+    type: "state", id: gameId, version: 4, color: "w", result: "0-1",
+    status: "finished", rated: true, rating_change: { before: 1200, after: 1184 },
+    position: { ...position, ending: "checkmate", legal_moves: [] }, moves: [],
+  }) } as MessageEvent));
+  expect(screen.getByText(/Rated ·/)).toBeVisible();
+  expect(screen.getByText("Your rating: 1200 → 1184 (-16)")).toBeVisible();
+});

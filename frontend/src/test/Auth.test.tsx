@@ -31,6 +31,26 @@ it("registers an account and renders the authenticated dashboard", async () => {
   expect(new Headers(registration?.[1]?.headers).get("X-CSRF-Token")).toBe("test-csrf");
 });
 
+it("loads the current rating when entering the account page", async () => {
+  const fetchMock = mockServer();
+  const server = fetchMock.getMockImplementation();
+  if (!server) throw new Error("Missing test server");
+  fetchMock.mockImplementation(async (input, options) => {
+    if (!String(input).endsWith("/auth/me")) return server(input, options);
+    return json({
+      ...authResult.user,
+      ratings: authResult.user.ratings.map(row =>
+        row.speed === "blitz" ? { ...row, rating: 1216, wins: 1 } : row),
+    });
+  });
+  renderPage("/login");
+  const user = userEvent.setup();
+  await user.type(await screen.findByLabelText("Email address"), "kevin@example.com");
+  await user.type(screen.getByLabelText("Password"), "a safe passphrase");
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+  expect(await screen.findByText("1216")).toBeVisible();
+});
+
 it("shows invalid credentials and keeps the user on the login page", async () => {
   mockServer({ rejectLogin: true });
   renderPage("/login");

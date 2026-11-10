@@ -2,24 +2,45 @@
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
+from uuid import UUID
 
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.chess import Position
-from app.db.models import Game, GameStatus
+from app.db.models import Game, GameKind, GameStatus, Speed, TimeControl
 from app.db.session import Database
 from app.services.notifications import GameNotifications, notify_transaction
+from app.services.ratings import settle_ratings
 
 PRESETS = {
-    "1+0": (60000, 0),
-    "3+2": (180000, 2000),
-    "5+0": (300000, 0),
-    "10+0": (600000, 0),
-    "15+10": (900000, 10000),
+    TimeControl.BULLET_1: (60000, 0, Speed.BULLET),
+    TimeControl.BLITZ_3_2: (180000, 2000, Speed.BLITZ),
+    TimeControl.BLITZ_5: (300000, 0, Speed.BLITZ),
+    TimeControl.RAPID_10: (600000, 0, Speed.RAPID),
+    TimeControl.RAPID_15_10: (900000, 10000, Speed.RAPID),
 }
+
+
+def new_timed_game(
+    white_id: UUID, black_id: UUID, control: TimeControl, now: datetime, *, rated: bool
+) -> Game:
+    initial, increment, speed = PRESETS[control]
+    return Game(
+        kind=GameKind.MULTIPLAYER,
+        white_user_id=white_id,
+        black_user_id=black_id,
+        rated=rated,
+        speed=speed,
+        initial_time_ms=initial,
+        increment_ms=increment,
+        white_remaining_ms=initial,
+        black_remaining_ms=initial,
+        turn_started_at=now,
+        first_move_deadline=now + timedelta(seconds=30),
+    )
 
 
 async def database_now(session: AsyncSession) -> datetime:
@@ -129,6 +150,7 @@ async def sweep_once(database: Database, notifications: GameNotifications | None
         now = await database_now(session)
         for game in games:
             if expire(game, now):
+                await settle_ratings(session, game)
                 await notify_transaction(session, game.id)
                 changed.append(game.id)
     if notifications is not None:
