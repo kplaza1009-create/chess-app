@@ -163,6 +163,7 @@ export function GamePage() {
         {rating && <p className="rating-result">Your rating: {rating.before} → {rating.after} ({delta > 0 ? "+" : ""}{delta})</p>}
         {findAgain && <Link className="button-primary" to="/play">Find another game</Link>}
       </div>}
+      {gameOver && <p className="game-replay-action"><Link to={`/history/online/${id}`}>Replay this game and download PGN</Link></p>}
       {state?.clock?.first_move_ms != null && <p className="board-hint">{turn}: make your first move before the game aborts. <GameClock label="First move deadline" color={turn === "White" ? "White" : "Black"} milliseconds={state.clock.first_move_ms} running receivedAt={state.receivedAt} /></p>}
       <div className="practice-layout"><div className="board-column">
         <div className="player-strip">

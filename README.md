@@ -4,7 +4,7 @@
 
 Chess Room is an in-development web app for playing chess with other people. It includes a **custom chess engine written in Python (without `python-chess`)**, interactive boards, authenticated accounts, persistent online games, server-controlled clocks, and rating-based matchmaking.
 
-> **Project status:** Active development — **Phase 8 completed**. The repository is a working development build, not yet a publicly deployed production service.
+> **Project status:** Active development — **Phase 9 completed**. The repository is a working development build, not yet a publicly deployed production service.
 
 ## Features
 
@@ -17,11 +17,12 @@ Chess Room is an in-development web app for playing chess with other people. It 
 - **Timed games:** Bullet, blitz, and rapid formats with authoritative server clocks, increments where applicable, and timeout adjudication.
 - **Rated matchmaking:** A PostgreSQL-backed queue that pairs players on the same time control using a widening rating window; queue cancellation on navigation and page exit.
 - **Elo ratings:** Separate bullet, blitz, and rapid ratings with transactional updates after eligible rated games.
+- **Game history and replay:** Private game history, forward/back controls, direct move selection, and board flipping.
+- **PGN import/export:** Download completed games or import a validated main line into a separate personal, unrated archive.
 - **Testing and validation:** Engine/perft tests, backend integration tests, frontend component tests, static checks, and network smoke-test scripts.
 
 ### Planned
 
-- Game history viewer and move replay, with PGN import/export
 - Computer opponent using minimax and alpha-beta pruning
 - Spectator mode, chat, draw offers, resignation, and rematches
 - Leaderboards and expanded user profiles
@@ -76,6 +77,7 @@ Open:
 - **Frontend:** http://localhost:5173
 - **Play / matchmaking:** http://localhost:5173/play
 - **Local practice:** http://localhost:5173/practice
+- **History and PGN:** http://localhost:5173/history
 - **API documentation (development only):** http://localhost:8000/docs
 
 To try multiplayer, open the site in **two separate browser profiles** and sign in with different accounts. Choose the same time control and select **Find opponent** on each account. Alternatively, create a private room and invite another registered user.
@@ -103,14 +105,14 @@ docker compose --profile test run --build --rm frontend_test
 docker compose exec api alembic check
 ```
 
-**Latest documented Phase 8 review results (not rerun for this README):**
+**Phase 9 verification:**
 
-- 467 backend tests passed; nine optional deep-perft cases skipped
-- 59 frontend tests passed
+- 521 backend tests passed; nine optional deep-perft cases skipped
+- 73 frontend tests passed
 - Production frontend build, Ruff, mypy, and Alembic checks passed
-- Two-process multiplayer smoke tests covered matchmaking cancellation, rated play, and rating settlement
+- Real-server tests covered matchmaking, rated play, PGN round trips, archive privacy, and move delivery
 
-See [`PHASE8.md`](PHASE8.md) for the verification notes, reproduction steps, caveats, and follow-up fixes.
+See [`PHASE9.md`](PHASE9.md) for exact commands, measurements and limitations. Chromium could not launch here, so the new browser smoke and visual layout remain unverified. Docker/Nginx runtime was not executed.
 
 ## Repository layout
 
@@ -137,7 +139,7 @@ chess-app/
 
 ## Current limitations
 
-This is a development-stage portfolio project. The game-history/PGN UI, computer opponent, spectator/chat features, full public deployment, and some production hardening are future work. Matchmaking currently prioritizes correctness over high-throughput queue scaling. For the exact state of Phase 8 and its known follow-ups, read [`PHASE8.md`](PHASE8.md) and [`PROJECT_PLAN.md`](PROJECT_PLAN.md).
+This is a development-stage portfolio project. The computer opponent, spectator/chat features, full public deployment, and some production hardening are future work. PGN import saves one standard-chess main line at a time; comments and variations are discarded, and size/work limits apply. Matchmaking currently prioritizes correctness over high-throughput queue scaling. Read [`PHASE9.md`](PHASE9.md) and [`PROJECT_PLAN.md`](PROJECT_PLAN.md) for the current boundaries.
 
 ## How it was built
 
@@ -146,6 +148,7 @@ Built with AI coding assistants. I designed the phase plan, set the requirements
 ## Project documentation
 
 - [`PROJECT_PLAN.md`](PROJECT_PLAN.md) — goals, milestones, and remaining phases
+- [`PHASE9.md`](PHASE9.md) — game history, replay, PGN, and current verification
 - [`PHASE8.md`](PHASE8.md) — current matchmaking/rating implementation and verification
 - [`PHASE7.md`](PHASE7.md) — persistent clocks and opening deadlines
 - [`AUTH_TIMEZONE_FIX.md`](AUTH_TIMEZONE_FIX.md) — UTC refresh-cookie fix and regressions

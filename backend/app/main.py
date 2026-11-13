@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
 from typing import Annotated, Literal
 
+from anyio import CapacityLimiter
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,7 @@ from app.api.auth import clear_refresh_cookie
 from app.api.auth import router as auth_router
 from app.api.board import router as board_router
 from app.api.games import router as games_router
+from app.api.history import router as history_router
 from app.api.matchmaking import router as matchmaking_router
 from app.config import Settings, get_settings
 from app.db.session import Database, get_session
@@ -40,6 +42,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         database = Database(settings)
         application.state.database = database
         application.state.game_connections = {}
+        application.state.pgn_limiter = CapacityLimiter(2)
         clocks: asyncio.Task[None] | None = None
         listener: asyncio.Task[None] | None = None
         notifications = GameNotifications()
@@ -84,6 +87,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(board_router)
     application.include_router(games_router)
     application.include_router(matchmaking_router)
+    application.include_router(history_router)
 
     @application.exception_handler(AuthError)
     async def authentication_error(request: Request, exc: AuthError) -> JSONResponse:

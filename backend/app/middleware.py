@@ -29,9 +29,11 @@ class SecurityHeadersMiddleware:
             await send(message)
 
         if is_api and scope["method"] == "POST":
+            # Only PGN import needs a larger JSON envelope. Keep auth limits intact.
+            body_limit = 524_288 if scope["path"] == "/api/v1/history/import" else AUTH_BODY_LIMIT
             content_length = Headers(scope=scope).get("content-length", "")
             if content_length.isascii() and content_length.isdecimal():
-                if len(content_length) > 20 or int(content_length) > AUTH_BODY_LIMIT:
+                if len(content_length) > 20 or int(content_length) > body_limit:
                     response = JSONResponse(
                         {"detail": "Request body is too large"}, status_code=413
                     )
@@ -45,7 +47,7 @@ class SecurityHeadersMiddleware:
                         if message["type"] == "http.disconnect":
                             return
                         body.extend(message.get("body", b""))
-                        if len(body) > AUTH_BODY_LIMIT:
+                        if len(body) > body_limit:
                             break
                         if not message.get("more_body", False):
                             break
@@ -53,7 +55,7 @@ class SecurityHeadersMiddleware:
                 response = JSONResponse({"detail": "Request body timed out"}, status_code=408)
                 await response(scope, receive, secure_send)
                 return
-            if len(body) > AUTH_BODY_LIMIT:
+            if len(body) > body_limit:
                 response = JSONResponse({"detail": "Request body is too large"}, status_code=413)
                 await response(scope, receive, secure_send)
                 return

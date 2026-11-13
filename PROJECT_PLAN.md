@@ -43,7 +43,7 @@ that the current snapshot is ready for production deployment.
 | 6 | WebSocket game server, state synchronization, reconnect | Implemented; browser smoke independently verified |
 | 7 | Time controls and server-side clocks | Implemented; review fixes in REVIEW_FIXES.md |
 | 8 | Matchmaking queue and ELO system | Implemented; checks in PHASE8.md |
-| 9 | Game history, replay viewer, PGN import/export | Pending |
+| 9 | Game history, replay viewer, PGN import/export | Implemented; checks and limits in PHASE9.md |
 | 10 | Minimax AI with alpha-beta pruning | Pending |
 | 11 | Spectators, chat, draw/resign/rematch | Pending |
 | 12 | Leaderboard and profile pages | Pending |

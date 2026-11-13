@@ -12,9 +12,11 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, CreatedAt
@@ -248,3 +250,24 @@ class RatingChange(CreatedAt, Base):
     speed: Mapped[Speed] = mapped_column(db_enum(Speed, "speed"))
     rating_before: Mapped[int] = mapped_column(Integer)
     rating_after: Mapped[int] = mapped_column(Integer)
+
+
+class ImportedGame(CreatedAt, Base):
+    """A user's private PGN archive, deliberately separate from rated games."""
+
+    __tablename__ = "imported_games"
+    __table_args__ = (
+        CheckConstraint("result IN ('*', '1-0', '0-1', '1/2-1/2')", name="result"),
+        CheckConstraint("ply_count BETWEEN 0 AND 1000", name="plies"),
+        CheckConstraint("octet_length(pgn) <= 131072", name="pgn_size"),
+        Index("ix_imported_games_owner_history", "owner_id", text("created_at DESC"), "id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    headers: Mapped[dict[str, str]] = mapped_column(JSONB)
+    initial_fen: Mapped[str] = mapped_column(String(160))
+    moves: Mapped[list[dict[str, str]]] = mapped_column(JSONB)
+    result: Mapped[str] = mapped_column(String(7))
+    ply_count: Mapped[int] = mapped_column(Integer)
+    pgn: Mapped[str] = mapped_column(Text)
