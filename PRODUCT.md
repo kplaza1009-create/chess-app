@@ -26,7 +26,8 @@ The custom engine and a local practice board at /practice are also implemented.
 Participant-only timed multiplayer rooms at /games support WebSocket state
 sync, durable moves, and reconnect. The /play lobby pairs players for rated
 games and settles separate Elo ratings for bullet, blitz, and rapid.
-AI, history browsing, profiles, and deployment remain later work.
+Personal history, read-only replay, and PGN import/export are implemented in
+Phase 9. Imports are private and unrated. AI, profiles, and deployment remain later work.
 The engine must be written in Python without python-chess.
 
 ## Operating Context
