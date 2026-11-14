@@ -1,4 +1,11 @@
-# Codex handoff — Phase 8 implemented
+# Codex handoff — Phase 9 implemented
+
+Read PHASE9.md for personal history, read-only replay, and bounded PGN import/export.
+Migration 0005 adds owner-only imported archives, separate from rated games.
+The online-history API exposes only a participant's finished or aborted games.
+The UI's History link opens /history; /history/import accepts a file or pasted PGN.
+SAN parsing now filters candidates and accepts omitted check suffixes and promotion =.
+Phase 10 is next and requires a new request. Preserve all Phase 8 behavior below.
 
 Read PHASE8.md for the current upgrade steps and verification. The Play page
 uses PostgreSQL-backed matchmaking for timed rated games. The game transaction

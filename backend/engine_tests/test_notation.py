@@ -30,7 +30,8 @@ def test_checkmate_and_invalid_notation() -> None:
         position = position.play(uci)
     assert san(position, "d8h4") == "Qh4#"
     assert parse_san(position, "Qh4#").uci() == "d8h4"
-    for notation in ("Qh4", "Qh4+", "Qz9", "", "a" * 17):
+    assert parse_san(position, "Qh4").uci() == "d8h4"
+    for notation in ("Qh4+", "Qz9", "", "a" * 17):
         with pytest.raises(ChessError):
             parse_san(position, notation)
     with pytest.raises(ChessError):

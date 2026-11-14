@@ -6,9 +6,10 @@ const names: Record<string, string> = { p: "pawn", r: "rook", n: "knight", b: "b
 type Props = {
   state: BoardState; flipped: boolean; busy: boolean; lastMove: string | null;
   onMove: (move: string) => void;
+  readOnly?: boolean;
 };
 
-export function Chessboard({ state, flipped, busy, lastMove, onMove }: Props) {
+export function Chessboard({ state, flipped, busy, lastMove, onMove, readOnly = false }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [promotion, setPromotion] = useState<string[]>([]);
   const [focus, setFocus] = useState("e2");
@@ -18,7 +19,7 @@ export function Chessboard({ state, flipped, busy, lastMove, onMove }: Props) {
   const board = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => { setSelected(null); setPromotion([]); setDrag(null); origin.current = null; }, [state.fen]);
-  const locked = busy || state.ending !== null;
+  const locked = readOnly || busy || state.ending !== null;
   const squares = Array.from({ length: 64 }, (_, i) => flipped
     ? (Math.floor(i / 8) * 8 + 7 - i % 8) : ((7 - Math.floor(i / 8)) * 8 + i % 8));
   const legal = state.legal_moves.filter(move => move.slice(0, 2) === selected);
@@ -79,7 +80,7 @@ export function Chessboard({ state, flipped, busy, lastMove, onMove }: Props) {
 
   return <>
     <div className="chessboard" ref={board} role="group" aria-label="Chessboard" aria-busy={busy}
-      aria-describedby="board-help">
+      aria-describedby={readOnly ? "replay-help" : "board-help"}>
       {squares.map((square, index) => {
         const name = squareName(square);
         const piece = state.board[square] ?? ".";
