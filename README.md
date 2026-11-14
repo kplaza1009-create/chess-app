@@ -1,8 +1,12 @@
 # Chess Room
 
+[![CI](https://github.com/kplaza1009-create/chess-app/actions/workflows/ci.yml/badge.svg)](https://github.com/kplaza1009-create/chess-app/actions/workflows/ci.yml)
+
 **A full-stack, real-time multiplayer chess application built with React, TypeScript, Python, FastAPI, and PostgreSQL.**
 
 Chess Room is an in-development web app for playing chess with other people. It includes a **custom chess engine written in Python (without `python-chess`)**, interactive boards, authenticated accounts, persistent online games, server-controlled clocks, and rating-based matchmaking.
+
+![A rated 10+0 game in progress, with legal-move hints for the selected bishop, both players' clocks and ratings, and the move list](docs/images/game.png)
 
 > **Project status:** Active development — **Phase 9 completed**. The repository is a working development build, not yet a publicly deployed production service.
 
@@ -132,9 +136,10 @@ chess-app/
 │   ├── src/pages/         # Practice, matchmaking, game, auth
 │   └── src/test/          # UI and client tests
 ├── scripts/               # Local environment setup
+├── docs/                  # Roadmap, phase notes, and review records
+├── .github/workflows/     # CI: tests, linting, type checks on every push
 ├── compose.yaml           # Development/test service definitions
-├── .env.example           # Example configuration (safe to commit)
-└── docs/PROJECT_PLAN.md        # Full project roadmap
+└── .env.example           # Example configuration (safe to commit)
 ```
 
 ## Current limitations
