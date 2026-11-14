@@ -112,7 +112,7 @@ docker compose exec api alembic check
 - Production frontend build, Ruff, mypy, and Alembic checks passed
 - Real-server tests covered matchmaking, rated play, PGN round trips, archive privacy, and move delivery
 
-See [`PHASE9.md`](PHASE9.md) for exact commands, measurements and limitations. Chromium could not launch here, so the new browser smoke and visual layout remain unverified. Docker/Nginx runtime was not executed.
+See [`PHASE9.md`](PHASE9.md) for exact commands, measurements and limitations. The board, game and history browser smoke tests pass in Chromium. Docker/Nginx runtime was not executed.
 
 ## Repository layout
 
