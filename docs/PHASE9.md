@@ -180,6 +180,38 @@ was syntax-checked but was not run successfully. Consequently, visual fit,
 contrast and actual browser download behavior remain unverified here. The
 existing board/game browser scripts are preserved for local regression checks.
 
+The paragraph above records the authoring environment and is kept as written.
+The later independent review below supersedes its browser-verification gap.
+
+### Later independent review (November 14, 2026)
+
+Run separately from the authoring checks, on PostgreSQL 16 with
+`America/New_York`:
+
+- Backend 521 passed (three consecutive runs) and frontend 73 passed; Ruff,
+  mypy and Alembic drift check passed.
+- `frontend/scripts/history-smoke.mjs`, `board-smoke.mjs` and `game-smoke.mjs`
+  all **passed in Chromium**.
+- End to end in two browsers: a rated game played to checkmate, replayed with
+  First/Back/Next/Last, and its downloaded PGN read back by an external
+  reference parser as checkmate. An unrelated user received 404 for the
+  replay. An illegal import named the failing ply. A 44-move annotated game
+  imported and replayed at phone width.
+- PGN cross-check: 1,500 generated games (91,098 plies, including promotions,
+  castling, en passant and disambiguation) were imported in canonical,
+  suffix-free and zero-castling spellings. Every SAN, UCI move and position
+  matched an external reference library, and every exported PGN read back
+  identically. The only difference was the en passant FEN field: this engine
+  records the square after every double push, which is valid FEN.
+- **Defect found and fixed:** production Nginx limited every request body to
+  16 KiB, so valid imports above that returned `413` before reaching the API.
+  Tested with Nginx 1.24 rendering `frontend/nginx.conf.template`: annotated
+  imports of 20, 40 and 63 KiB failed before the fix and returned `201` after
+  it. `/api/v1/history/import` now allows 512 KiB, matching the API middleware;
+  a 19.6 KiB login request is still rejected with `413`.
+
+Still not executed: Docker/Compose image builds and a visual contrast audit.
+
 ## Next phase and effort estimate
 
 Phase 10 is the minimax opponent with alpha-beta pruning and three difficulty

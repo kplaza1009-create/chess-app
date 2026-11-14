@@ -17,7 +17,7 @@ application from a summary or substitute another technology stack.
   Phases 1–6 are implemented. Read docs/PHASE6.md for protocol and verification limits.
   Phase 8 is implemented; read docs/PHASE8.md for its behavior and verification.
   Phase 9 is implemented; read docs/PHASE9.md for archive permissions, PGN limits,
-  migration 0005 and the browser-verification boundary. Phase 10 is next.
+  migration 0005 and its later independent review. Phase 10 is next.
 - Use Python type hints and strict TypeScript. Validate external inputs and
   handle failures without exposing credentials or sensitive inputs.
 - Never use python-chess. Implement the move generator in Python ourselves.
