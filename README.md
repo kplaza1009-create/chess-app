@@ -112,7 +112,7 @@ docker compose exec api alembic check
 - Production frontend build, Ruff, mypy, and Alembic checks passed
 - Real-server tests covered matchmaking, rated play, PGN round trips, archive privacy, and move delivery
 
-See [`PHASE9.md`](PHASE9.md) for exact commands, measurements and limitations. The board, game and history browser smoke tests pass in Chromium. Docker/Nginx runtime was not executed.
+See [`docs/PHASE9.md`](docs/PHASE9.md) for exact commands, measurements and limitations. The board, game and history browser smoke tests pass in Chromium. Docker/Nginx runtime was not executed.
 
 ## Repository layout
 
@@ -134,12 +134,12 @@ chess-app/
 ├── scripts/               # Local environment setup
 ├── compose.yaml           # Development/test service definitions
 ├── .env.example           # Example configuration (safe to commit)
-└── PROJECT_PLAN.md        # Full project roadmap
+└── docs/PROJECT_PLAN.md        # Full project roadmap
 ```
 
 ## Current limitations
 
-This is a development-stage portfolio project. The computer opponent, spectator/chat features, full public deployment, and some production hardening are future work. PGN import saves one standard-chess main line at a time; comments and variations are discarded, and size/work limits apply. Matchmaking currently prioritizes correctness over high-throughput queue scaling. Read [`PHASE9.md`](PHASE9.md) and [`PROJECT_PLAN.md`](PROJECT_PLAN.md) for the current boundaries.
+This is a development-stage portfolio project. The computer opponent, spectator/chat features, full public deployment, and some production hardening are future work. PGN import saves one standard-chess main line at a time; comments and variations are discarded, and size/work limits apply. Matchmaking currently prioritizes correctness over high-throughput queue scaling. Read [`docs/PHASE9.md`](docs/PHASE9.md) and [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) for the current boundaries.
 
 ## How it was built
 
@@ -147,11 +147,11 @@ Built with AI coding assistants. I designed the phase plan, set the requirements
 
 ## Project documentation
 
-- [`PROJECT_PLAN.md`](PROJECT_PLAN.md) — goals, milestones, and remaining phases
-- [`PHASE9.md`](PHASE9.md) — game history, replay, PGN, and current verification
-- [`PHASE8.md`](PHASE8.md) — current matchmaking/rating implementation and verification
-- [`PHASE7.md`](PHASE7.md) — persistent clocks and opening deadlines
-- [`AUTH_TIMEZONE_FIX.md`](AUTH_TIMEZONE_FIX.md) — UTC refresh-cookie fix and regressions
+- [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) — goals, milestones, and remaining phases
+- [`docs/PHASE9.md`](docs/PHASE9.md) — game history, replay, PGN, and current verification
+- [`docs/PHASE8.md`](docs/PHASE8.md) — current matchmaking/rating implementation and verification
+- [`docs/PHASE7.md`](docs/PHASE7.md) — persistent clocks and opening deadlines
+- [`docs/AUTH_TIMEZONE_FIX.md`](docs/AUTH_TIMEZONE_FIX.md) — UTC refresh-cookie fix and regressions
 
 ---
 

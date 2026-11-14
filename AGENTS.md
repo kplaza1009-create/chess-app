@@ -1,8 +1,8 @@
 # Chess application: coding and mentoring instructions
 
-Read `CODEX_HANDOFF.md`, `PROJECT_PLAN.md`, `PHASE2.md`, `PHASE3.md`, and `PHASE4.md` before continuing.
+Read `docs/CODEX_HANDOFF.md`, `docs/PROJECT_PLAN.md`, `docs/PHASE2.md`, `docs/PHASE3.md`, and `docs/PHASE4.md` before continuing.
 For interface changes, also read `PRODUCT.md` and `DESIGN.md` and preserve the
-documented visual system. `REVIEW.md` records the Phase 1/2 remake and its scope.
+documented visual system. `docs/REVIEW.md` records the Phase 1/2 remake and its scope.
 The source files in this folder are the implementation; do not rebuild the
 application from a summary or substitute another technology stack.
 
@@ -14,9 +14,9 @@ application from a summary or substitute another technology stack.
   code. Spend more teaching time on WebSockets, move generation, perft, and
   minimax with alpha-beta pruning than on basic React, FastAPI, or PostgreSQL.
 - Complete only the requested phase and then wait for "next phase".
-  Phases 1–6 are implemented. Read PHASE6.md for protocol and verification limits.
-  Phase 8 is implemented; read PHASE8.md for its behavior and verification.
-  Phase 9 is implemented; read PHASE9.md for archive permissions, PGN limits,
+  Phases 1–6 are implemented. Read docs/PHASE6.md for protocol and verification limits.
+  Phase 8 is implemented; read docs/PHASE8.md for its behavior and verification.
+  Phase 9 is implemented; read docs/PHASE9.md for archive permissions, PGN limits,
   migration 0005 and the browser-verification boundary. Phase 10 is next.
 - Use Python type hints and strict TypeScript. Validate external inputs and
   handle failures without exposing credentials or sensitive inputs.
@@ -55,4 +55,4 @@ docker compose exec api alembic check
 python3 -m unittest discover -s scripts -p 'test_*.py' -v
 ```
 
-See `PHASE2.md` for the baseline results and known validation limits.
+See `docs/PHASE2.md` for the baseline results and known validation limits.
